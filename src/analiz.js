@@ -37,12 +37,11 @@ export async function yorumUret(ozet) {
   return yanit.content.filter(b => b.type === 'text').map(b => b.text).join('');
 }
 
-/** Veritabanındaki canlı kayıtları motorun formatına çevirir */
-export async function canliAnaliz({ gun = 365 } = {}) {
+/** Veritabanındaki canlı kayıtları, motorun beklediği CSV kolon adlarıyla düzeltir.
+    Hem /analiz/metrikler hem de /veri/csv bu satırları kullanır — tek kaynak. */
+async function canliSatirlar(gun = 365) {
   const kayitlar = await db.analizIcinKayitlar(gun);
-
-  // Motor CSV kolon adlarıyla çalışır; veritabanı alanlarını o adlara çeviriyoruz
-  const satirlar = kayitlar.map(k => ({
+  return kayitlar.map(k => ({
     'Başvuru Tarihi': k.olusturma,
     'Kapanış Tarihi': k.kapanma ?? '',
     // Tek ilçeli belediyede "ilçe" sabittir; İBB gibi çok ilçeli veride
@@ -54,8 +53,24 @@ export async function canliAnaliz({ gun = 365 } = {}) {
     'Durum': k.durum,
     'Açıklama': k.ozet ?? '',
   }));
+}
 
-  const norm = normalizeEt(satirlar);
+/** Bir hücreyi ; ile ayrılan CSV'ye güvenli şekilde yazar */
+function csvHucre(deger) {
+  const s = String(deger ?? '');
+  return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function satirlarCsvYap(satirlar) {
+  if (!satirlar.length) return '';
+  const basliklar = Object.keys(satirlar[0]);
+  const govde = satirlar.map(s => basliklar.map(b => csvHucre(s[b])).join(';'));
+  return '\uFEFF' + [basliklar.join(';'), ...govde].join('\n');
+}
+
+/** Veritabanındaki canlı kayıtları motorun formatına çevirir */
+export async function canliAnaliz({ gun = 365 } = {}) {
+  const norm = normalizeEt(await canliSatirlar(gun));
   return analizEt(norm);
 }
 
@@ -86,6 +101,34 @@ export function analizUclariniBagla(app) {
     }
     const s = await canliAnaliz({ gun: Number(req.query.gun ?? 365) });
     return yzOzetiHazirla(s);
+  });
+
+  // ---------------------------------------------------------------------
+  // Erken Uyarı Panosu için CANLI VERİ UCU.
+  // Panelin CONFIG.veriUrl alanına bu adres yazılır; panel her açılışta
+  // (ve isterse belirli aralıklarla) buraya gelip en güncel kayıtları
+  // CSV olarak indirir — siz elle dosya yüklemek zorunda kalmazsınız.
+  //
+  // Tarayıcıdan basit bir fetch() ile çağrıldığı için özel bir başlık
+  // (header) gönderemiyor; bu yüzden yetkilendirme URL'in İÇİNDE bir
+  // sorgu parametresiyle yapılıyor: ?anahtar=PANEL_ANAHTARI
+  // Bu adresi kimseyle paylaşmayın — şikayet açıklamaları gibi vatandaş
+  // verisi içeriyor.
+  // ---------------------------------------------------------------------
+  app.get('/veri/csv', async (req, reply) => {
+    if (process.env.PANEL_ANAHTARI &&
+        req.query.anahtar !== process.env.PANEL_ANAHTARI) {
+      return reply.code(401).send('Yetkisiz — adresteki ?anahtar= değeri yanlış.');
+    }
+    try {
+      const satirlar = await canliSatirlar(Number(req.query.gun ?? 730));
+      reply.header('Content-Type', 'text/csv; charset=utf-8');
+      reply.header('Cache-Control', 'no-store');
+      return satirlarCsvYap(satirlar);
+    } catch (e) {
+      req.log.error({ e }, 'Canlı veri CSV üretilemedi');
+      return reply.code(500).send('Hata: ' + e.message);
+    }
   });
 
   // Haftalık rapor — cron ile tetiklenir, çıktı e-postayla gider
