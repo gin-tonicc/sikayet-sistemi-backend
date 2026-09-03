@@ -27,6 +27,14 @@ app.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, 
   catch (e) { done(e, undefined); }
 });
 
+// Twilio webhook'ları application/x-www-form-urlencoded gönderir (JSON değil).
+// Ek bir paket kurmak yerine Node'un yerleşik URLSearchParams'ıyla ayrıştırıyoruz.
+app.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string' },
+  (req, body, done) => {
+    try { done(null, Object.fromEntries(new URLSearchParams(body))); }
+    catch (e) { done(e, undefined); }
+  });
+
 // ---------------------------------------------------------------------
 // 1. Webhook doğrulama (Meta ilk kurulumda bir kez çağırır)
 // ---------------------------------------------------------------------
@@ -93,8 +101,30 @@ app.post('/webhook/whatsapp', async (req, reply) => {
   } catch (err) {
     // Hata olsa bile Meta'ya 200 döndük; hatayı logla ve izleme sistemine gönder
     app.log.error({ err }, 'Mesaj işlenirken hata');
+    const gonderen = req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.from;
+    if (gonderen) await hataBildir('whatsapp', '+' + gonderen);
   }
 });
+
+/**
+ * Beklenmedik bir hata olduğunda vatandaşı SESSİZ BIRAKMAMAK için.
+ * Eskiden hata yalnızca loglanıyordu; vatandaş yazdığını sanıyor, sistemde
+ * hiçbir iz olmuyordu. Artık en azından haberdar ediliyor ve tekrar
+ * denemesi isteniyor.
+ */
+async function hataBildir(kanal, hedefId) {
+  try {
+    const { mesajGonder } = kanal === 'telegram'
+      ? await import('./telegram.js')
+      : await import('./whatsapp.js');
+    await mesajGonder(hedefId,
+      'Şu anda sistemimizde teknik bir sorun var ve bildiriminizi işleyemedik. ' +
+      'Lütfen birkaç dakika sonra tekrar deneyin. Acil bir durum varsa 153\'ü arayabilirsiniz.');
+  } catch (e) {
+    // Bildirim de gönderilemiyorsa yapılacak bir şey yok — en azından logla
+    console.error('Vatandaşa hata bildirimi gönderilemedi:', e.message);
+  }
+}
 
 function imzaGecerli(req) {
   const imza = req.headers['x-hub-signature-256'];
@@ -158,6 +188,8 @@ app.post('/webhook/telegram', async (req, reply) => {
     });
   } catch (err) {
     app.log.error({ err }, 'Telegram mesajı işlenirken hata');
+    const sohbetId = req.body?.message?.chat?.id;
+    if (sohbetId) await hataBildir('telegram', sohbetId);
   }
 });
 

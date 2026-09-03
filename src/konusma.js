@@ -6,7 +6,7 @@
 // =====================================================================
 
 import { db } from './db.js';
-import { analizEt, sesiMetneCevir, mukerrerMi } from './ai.js';
+import { analizEt, sesiMetneCevir, mukerrerMi, YapayZekaErisilemedi } from './ai.js';
 import * as whatsapp from './whatsapp.js';
 import * as telegram from './telegram.js';
 import { birimeBildir } from './bildirim.js';
@@ -14,12 +14,64 @@ import { birimeBildir } from './bildirim.js';
 // Hangi kanaldan geldiğine göre "gönder" ve "medya indir" burada seçilir.
 // Aşağıdaki akışın geri kalanı kanaldan tamamen habersizdir — yeni bir
 // kanal eklemek (SMS, web formu) sadece burada bir satır demektir.
+/**
+ * KISA ARALIKLI SEL KORUMASI
+ * Veritabanındaki günlük bildirim limiti, saniyede onlarca mesaj atan bir
+ * kişiyi durdurmuyordu — hem Anthropic faturası şişiyor hem sunucu kilitleniyordu.
+ * Bu, hafızada tutulan basit bir sayaç: aynı kişiden dakikada N mesajdan
+ * fazlası sessizce yok sayılır (vatandaşa tek bir uyarı gider).
+ *
+ * Not: Sunucu yeniden başlarsa sıfırlanır. Kalıcı çözüm Redis'tir; bu ölçekte
+ * gerekli değil ama trafik artarsa oraya taşınmalı.
+ */
+const DAKIKA_LIMITI = Number(process.env.DAKIKA_MESAJ_LIMITI ?? 12);
+const selSayaci = new Map();   // telefon -> { adet, pencereBaslangic, uyarildi }
+
+function selKontrol(telefon) {
+  const simdi = Date.now();
+  const kayit = selSayaci.get(telefon);
+
+  if (!kayit || simdi - kayit.pencereBaslangic > 60000) {
+    selSayaci.set(telefon, { adet: 1, pencereBaslangic: simdi, uyarildi: false });
+    return { engelle: false, uyar: false };
+  }
+
+  kayit.adet++;
+  if (kayit.adet > DAKIKA_LIMITI) {
+    const uyar = !kayit.uyarildi;
+    kayit.uyarildi = true;
+    return { engelle: true, uyar };
+  }
+  return { engelle: false, uyar: false };
+}
+
+// Hafıza sızıntısı olmasın: 10 dakikada bir eski kayıtları temizle
+setInterval(() => {
+  const simdi = Date.now();
+  for (const [anahtar, kayit] of selSayaci) {
+    if (simdi - kayit.pencereBaslangic > 300000) selSayaci.delete(anahtar);
+  }
+}, 600000).unref?.();
+
 const KANALLAR = {
   whatsapp: { gonder: whatsapp.mesajGonder, medyaIndir: whatsapp.medyaIndir },
   telegram: { gonder: telegram.mesajGonder, medyaIndir: telegram.medyaIndir },
 };
 
 export async function mesajIsle(gelen) {
+  // ---- 0. Sel koruması ----------------------------------------------
+  // Veritabanına ve yapay zekaya HİÇ gitmeden önce bakılır; amacı zaten
+  // pahalı işlemleri hiç başlatmamak.
+  const sel = selKontrol(gelen.telefon);
+  if (sel.engelle) {
+    if (sel.uyar) {
+      await KANALLAR[gelen.kanal].gonder(gelen.hedefId,
+        'Çok sayıda mesaj aldık. Lütfen biraz bekleyip tekrar yazın. ' +
+        'Acil bir durum varsa 153\'ü arayabilirsiniz.');
+    }
+    return;
+  }
+
   const ayarlar = await db.ayarlariGetir();
 
   // ---- 1. Vatandaşı bul veya oluştur -------------------------------
@@ -78,7 +130,40 @@ export async function mesajIsle(gelen) {
     db.sonKonusmalar(vatandas.id, 10),
   ]);
 
-  const analiz = await analizEt({ gecmis, mesaj: metin, kategoriler, mahalleler });
+  let analiz;
+  try {
+    analiz = await analizEt({ gecmis, mesaj: metin, kategoriler, mahalleler });
+  } catch (hata) {
+    if (!(hata instanceof YapayZekaErisilemedi)) throw hata;
+
+    // YAPAY ZEKA SERVİSİ ÇALIŞMIYOR.
+    // Eskiden burada talep tamamen kaybolurdu. Artık kaydı yine de açıyoruz:
+    // sınıflandırılmamış olarak triyaj havuzuna düşer, bir insan bakar.
+    // İlke: DOĞRU SINIFLANDIRMAK, KAYDI HİÇ AÇMAMAKTAN daha az önemlidir.
+    console.error('[YEDEK MOD] Yapay zeka devre dışı, kayıt triyaja açılıyor:', hata.message);
+
+    const yedek = await kayitOlustur({
+      vatandas, metin, medyaYolu, gelen, kategoriler, mahalleler,
+      analiz: {
+        tip: 'sikayet',
+        acil: false,
+        guven: 0,
+        gerekce: 'Yapay zeka servisine ulaşılamadı — insan sınıflandırması bekliyor.',
+        ozet: (metin ?? '').slice(0, 300),
+        baslik: (metin ?? '').slice(0, 80),
+        kategori_kodu: null,
+        mahalle: null,
+        adres: null,
+        oncelik: 'normal',
+      },
+    });
+
+    await yanitla(vatandas, gelen,
+      `Bildiriminiz alındı.\n\nTakip numarası: *${yedek.takip_no}*\n\n` +
+      `Sistemimizde geçici bir yoğunluk var; talebiniz kayıt altına alındı ve ` +
+      `en kısa sürede ilgili birime yönlendirilecek.`);
+    return;
+  }
 
   if (!analiz) {
     await yanitla(vatandas, gelen,
@@ -121,7 +206,16 @@ export async function mesajIsle(gelen) {
       esik: Number(ayarlar.mukerrer_benzerlik ?? 0.35),
     });
 
-    const ayniTakipNo = await mukerrerMi(analiz.ozet, adaylar);
+    // Mükerrer kontrolü BAŞARISIZ OLURSA akışı durdurmuyoruz: ayrı bir kayıt
+    // açmak, talebi tamamen kaybetmekten çok daha iyidir. Olası mükerrer,
+    // triyajda insan gözüyle yakalanabilir.
+    let ayniTakipNo = null;
+    try {
+      ayniTakipNo = await mukerrerMi(analiz.ozet, adaylar);
+    } catch (hata) {
+      console.error('[UYARI] Mükerrer kontrolü yapılamadı, ayrı kayıt açılıyor:', hata.message);
+    }
+
     if (ayniTakipNo) {
       const ana = await db.sikayetGetirTakipNo(ayniTakipNo);
       await db.destekleyenEkle(ana.id, vatandas.id, analiz.ozet, gelen.kanal);
