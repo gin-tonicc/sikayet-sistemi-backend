@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Birim Paneli — Şikayet Yönetim Sistemi</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--murekkep:#0F1F33;--kobalt:#1B4A9C;--turkuaz:#1F8A7A;--kehribar:#D08A17;--mercan:#D4432A;
+  --zemin:#E9EDF1;--yuzey:#fff;--kum:#C9D2DB;--sis:#5C6B7A;--koyu-sis:#33404E;--r:3px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--zemin);color:var(--murekkep);font-size:14px;line-height:1.5}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;letter-spacing:-.015em}
+.mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+button,select,input,textarea{font:inherit}
+.btn{font-size:12.5px;font-weight:600;padding:8px 13px;border-radius:var(--r);border:1px solid var(--kum);
+  background:var(--yuzey);color:var(--murekkep);cursor:pointer}
+.btn:hover{border-color:var(--sis)}
+.btn.ana{background:var(--murekkep);color:#fff;border-color:var(--murekkep)}
+.btn.kirmizi{background:var(--mercan);color:#fff;border-color:var(--mercan)}
+input[type=text],input[type=email],input[type=password],select,textarea{
+  padding:8px 10px;border:1px solid var(--kum);border-radius:var(--r);background:var(--yuzey);width:100%}
+textarea{min-height:80px;resize:vertical}
+
+/* giriş */
+.giris{max-width:380px;margin:9vh auto;background:var(--yuzey);border:1px solid var(--kum);
+  border-radius:var(--r);padding:26px}
+.giris h1{font-size:19px;margin-bottom:4px}
+.giris p{font-size:12.5px;color:var(--sis);margin-bottom:18px}
+.giris label{font-size:11px;color:var(--sis);display:block;margin:10px 0 4px}
+.hata{background:#FBE7E3;color:var(--mercan);font-size:12px;padding:9px 11px;border-radius:var(--r);margin-top:12px}
+
+/* uygulama */
+.tepe{background:var(--murekkep);color:#fff;padding:11px 20px;display:flex;justify-content:space-between;
+  align-items:center;gap:14px;flex-wrap:wrap}
+.tepe .marka{font-family:'Space Grotesk';font-weight:700;font-size:15px}
+.tepe .kim{font-size:11.5px;opacity:.72}
+.sekmeler{display:flex;gap:2px;background:var(--yuzey);border-bottom:1px solid var(--kum);padding:0 20px;overflow-x:auto}
+.sekmeler button{background:none;border:none;padding:11px 15px;font-size:12.5px;font-weight:600;color:var(--sis);
+  cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.sekmeler button[aria-current=page]{color:var(--murekkep);border-bottom-color:var(--kobalt)}
+.kabuk{max-width:1320px;margin:0 auto;padding:18px 20px 60px}
+
+.kart{background:var(--yuzey);border:1px solid var(--kum);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
+.kart-bas{padding:11px 15px;border-bottom:1px solid var(--kum);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.kart-bas h2{font-size:13px;font-weight:600}
+.kart-bas .not{font-size:11px;color:var(--sis)}
+.kart-ic{padding:15px}
+
+.kpi-satir{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.kpi{background:var(--yuzey);border:1px solid var(--kum);border-radius:var(--r);padding:13px 15px}
+.kpi .et{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--sis);margin-bottom:5px}
+.kpi .deger{font-family:'IBM Plex Mono';font-size:24px;font-weight:600;line-height:1.1}
+.kpi .alt{font-size:11px;color:var(--sis);margin-top:3px}
+
+.satir{width:100%;text-align:left;background:none;border:none;border-bottom:1px solid #EDF1F4;
+  padding:12px 15px;cursor:pointer;display:block}
+.satir:hover{background:#F5F8FA}
+.satir-ust{display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap}
+.satir-ust .no{font-family:'IBM Plex Mono';font-size:11px;color:var(--sis)}
+.satir-ust b{font-size:13.5px}
+.satir-alt{font-size:12px;color:var(--sis)}
+.rozet{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:2px}
+.rozet.acil{background:#FBE7E3;color:var(--mercan)}
+.rozet.triyaj{background:#FAF0DC;color:#9B6407}
+.rozet.yeni{background:#E7EEF8;color:var(--kobalt)}
+.rozet.islemde{background:#EDF1F4;color:var(--koyu-sis)}
+.rozet.cozuldu,.rozet.kapandi{background:#E4F1EE;color:var(--turkuaz)}
+.yas{font-family:'IBM Plex Mono';font-size:11px;color:var(--sis);margin-left:auto}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--sis);
+  font-weight:600;padding:9px 12px;border-bottom:1px solid var(--kum)}
+td{padding:9px 12px;border-bottom:1px solid #EDF1F4}
+tr:last-child td{border-bottom:none}
+td.sag,th.sag{text-align:right}
+
+.perde{position:fixed;inset:0;background:rgba(15,31,51,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:40}
+.perde.acik{display:flex}
+.modal{background:var(--yuzey);border-radius:var(--r);max-width:640px;width:100%;max-height:88vh;overflow:auto}
+.modal-bas{padding:14px 18px;border-bottom:1px solid var(--kum);display:flex;justify-content:space-between;align-items:center}
+.modal-ic{padding:18px}
+.alan{margin-bottom:12px}
+.alan label{font-size:11px;color:var(--sis);display:block;margin-bottom:4px}
+.bilgi{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;font-size:12.5px;margin-bottom:16px}
+.bilgi span{color:var(--sis)}
+.gecmis{border-top:1px solid var(--kum);margin-top:16px;padding-top:14px}
+.gecmis li{list-style:none;font-size:12px;color:var(--koyu-sis);padding:5px 0;border-bottom:1px solid #F2F5F7}
+.gecmis li time{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--sis);margin-right:8px}
+.bos{padding:36px;text-align:center;color:var(--sis);font-size:13px}
+.uyari{background:#FAF0DC;border:1px solid #EBD4A0;border-radius:var(--r);padding:10px 12px;
+  font-size:11.5px;color:#7A4E05;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<div id="uygulama"><div class="bos">Yükleniyor…</div></div>
+
+<div class="perde" id="perde"><div class="modal" id="modal"></div></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+/* =====================================================================
+   AYAR — Supabase panelinden alınır (Project Settings > API)
+   ANON anahtarı tarayıcıda durur; bu güvenlidir çünkü hangi kaydı kimin
+   göreceğini veritabanındaki RLS politikaları belirler
+   (bkz. 05-VERITABANI/rls-politikalari.sql).
+   ===================================================================== */
+const AYAR = {
+  url: 'https://ylclsakyaztnztwllhti.supabase.co',
+  anon: 'sb_publishable_-HcJBIhhuim_k0poCPr_Zg_DGU7UVuf',
+};
+
+const sb = createClient(AYAR.url, AYAR.anon);
+
+const DURUM_ADI = {
+  triyaj: 'Değerlendiriliyor', yeni: 'Yeni', atandi: 'Atandı', islemde: 'İşlemde',
+  beklemede: 'Beklemede', havale: 'Havale edildi', cozuldu: 'Çözüldü',
+  kapandi: 'Kapandı', tekrar_acildi: 'Yeniden açıldı', reddedildi: 'Reddedildi',
+};
+const ACIK_DURUMLAR = ['triyaj', 'yeni', 'atandi', 'islemde', 'beklemede', 'tekrar_acildi'];
+
+let PROFIL = null, SAYFA = 'gelen', KAYITLAR = [], KANAL = null;
+
+/* ---------------- oturum ---------------- */
+
+const { data: { session } } = await sb.auth.getSession();
+if (session) await baslat(); else girisEkrani();
+
+sb.auth.onAuthStateChange((olay) => {
+  if (olay === 'SIGNED_OUT') location.reload();
+});
+
+function girisEkrani(hata) {
+  document.getElementById('uygulama').innerHTML = `
+    <div class="giris">
+      <h1>Birim Paneli</h1>
+      <p>Belediye e-posta adresinizle giriş yapın.</p>
+      <label>E-posta</label><input type="email" id="eposta" autocomplete="username">
+      <label>Parola</label><input type="password" id="parola" autocomplete="current-password">
+      <div style="margin-top:16px"><button class="btn ana" style="width:100%" id="girisBtn">Giriş yap</button></div>
+      ${hata ? `<div class="hata">${kacir(hata)}</div>` : ''}
+    </div>`;
+  document.getElementById('girisBtn').onclick = async () => {
+    const { error } = await sb.auth.signInWithPassword({
+      email: document.getElementById('eposta').value.trim(),
+      password: document.getElementById('parola').value,
+    });
+    if (error) girisEkrani('Giriş başarısız: ' + error.message);
+    else baslat();
+  };
+  document.getElementById('parola').onkeydown = e => { if (e.key === 'Enter') document.getElementById('girisBtn').click(); };
+}
+
+async function baslat() {
+  const { data: { user } } = await sb.auth.getUser();
+  const { data } = await sb.from('profiller')
+    .select('*, birimler ( id, ad, kisa_ad )').eq('id', user.id).maybeSingle();
+
+  if (!data) return girisEkrani('Bu hesap bir birime tanımlanmamış. Sistem yöneticinize başvurun.');
+  PROFIL = data;
+  await kayitlariGetir();
+  canliBagla();
+  ciz();
+}
+
+/* ---------------- veri ---------------- */
+
+async function kayitlariGetir() {
+  const { data, error } = await sb.from('sikayetler')
+    .select(`id, takip_no, baslik, ozet, durum, oncelik, acil, olusturma, cozum_tarihi,
+             mahalle_metin, adres, ai_guven, ai_gerekce, destekleyen_sayisi, sla_bitis,
+             kategoriler ( ad ), birimler ( ad, kisa_ad )`)
+    .order('acil', { ascending: false })
+    .order('olusturma', { ascending: false })
+    .limit(500);
+  if (error) { console.error(error); return; }
+  KAYITLAR = data ?? [];
+}
+
+// Canlı bağlantı: veritabanına yeni kayıt düştüğü anda liste güncellenir
+function canliBagla() {
+  if (KANAL) sb.removeChannel(KANAL);
+  KANAL = sb.channel('sikayet-akisi')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'sikayetler' },
+      async () => { await kayitlariGetir(); ciz(); })
+    .subscribe();
+}
+
+/* ---------------- çizim ---------------- */
+
+function ciz() {
+  const yonetici = ['ust_yonetim', 'sistem_yoneticisi', 'triyaj'].includes(PROFIL.rol);
+  const sekmeler = [
+    ['gelen', 'Gelen kutusu'],
+    ['bekleyen', 'Bekleyenler'],
+    ...(yonetici ? [['triyaj', 'Triyaj havuzu'], ['panos', 'Yönetim panosu']] : []),
+    ['kapali', 'Kapanmış'],
+  ];
+
+  document.getElementById('uygulama').innerHTML = `
+    <div class="tepe">
+      <div><div class="marka">Şikayet Yönetim Sistemi</div></div>
+      <div class="kim">${kacir(PROFIL.ad_soyad ?? '')} —
+        ${kacir(PROFIL.birimler?.ad ?? 'Birim atanmamış')} • ${kacir(PROFIL.rol)}
+        <button class="btn" style="margin-left:10px;padding:4px 9px" id="cikis">Çıkış</button></div>
+    </div>
+    <div class="sekmeler">
+      ${sekmeler.map(([k, ad]) => `<button data-s="${k}" ${k === SAYFA ? 'aria-current="page"' : ''}>${ad}</button>`).join('')}
+    </div>
+    <div class="kabuk">${
+      SAYFA === 'panos' ? sayfaPanos() :
+      SAYFA === 'triyaj' ? liste(KAYITLAR.filter(k => k.durum === 'triyaj'), 'Triyaj havuzu',
+        'Yapay zekanın emin olamadığı kayıtlar. Doğru birime siz yönlendirirsiniz.') :
+      SAYFA === 'bekleyen' ? liste(KAYITLAR.filter(k => ['beklemede', 'cozuldu'].includes(k.durum)),
+        'Bekleyenler', 'Beklemeye alınmış ve vatandaş onayı bekleyen kayıtlar.') :
+      SAYFA === 'kapali' ? liste(KAYITLAR.filter(k => ['kapandi', 'reddedildi', 'havale'].includes(k.durum)), 'Kapanmış kayıtlar') :
+      liste(KAYITLAR.filter(k => ACIK_DURUMLAR.includes(k.durum) && k.durum !== 'triyaj'), 'Gelen kutusu')
+    }</div>`;
+
+  document.querySelectorAll('.sekmeler button').forEach(b =>
+    b.onclick = () => { SAYFA = b.dataset.s; ciz(); });
+  document.getElementById('cikis').onclick = () => sb.auth.signOut();
+  document.querySelectorAll('.satir[data-id]').forEach(b =>
+    b.onclick = () => detayAc(b.dataset.id));
+}
+
+function liste(kayitlar, baslik, aciklama) {
+  const acik = KAYITLAR.filter(k => ACIK_DURUMLAR.includes(k.durum));
+  const yaslar = acik.map(k => yasGun(k.olusturma));
+  const kapanan = KAYITLAR.filter(k => k.cozum_tarihi);
+  const sureler = kapanan.map(k => (new Date(k.cozum_tarihi) - new Date(k.olusturma)) / 86400000);
+
+  return `
+  <div class="kpi-satir">
+    ${kpi('Açık kayıt', acik.length, `${acik.filter(k => k.acil).length} acil`)}
+    ${kpi('En eski açık', yaslar.length ? Math.max(...yaslar).toFixed(0) : '—', 'gün')}
+    ${kpi('Açık yaşı (medyan)', yaslar.length ? medyan(yaslar).toFixed(1) : '—', 'gün')}
+    ${kpi('Çözüm süresi (medyan)', sureler.length ? medyan(sureler).toFixed(1) : '—',
+      `${kapanan.length} kapanmış kayıt üzerinden`)}
+  </div>
+  <div class="kart">
+    <div class="kart-bas"><h2>${baslik}</h2><span class="not">${kayitlar.length} kayıt</span></div>
+    ${aciklama ? `<div class="kart-ic" style="padding-bottom:0"><p class="not" style="font-size:12px;color:var(--sis)">${aciklama}</p></div>` : ''}
+    ${kayitlar.length ? kayitlar.map(satirHTML).join('') : '<div class="bos">Kayıt yok.</div>'}
+  </div>`;
+}
+
+function satirHTML(k) {
+  return `<button class="satir" data-id="${k.id}">
+    <div class="satir-ust">
+      ${k.acil ? '<span class="rozet acil">acil</span>' : ''}
+      <span class="rozet ${k.durum}">${DURUM_ADI[k.durum] ?? k.durum}</span>
+      <b>${kacir(k.baslik ?? '(başlıksız)')}</b>
+      <span class="no">${kacir(k.takip_no ?? '')}</span>
+      <span class="yas">${yasGun(k.olusturma).toFixed(0)} gün</span>
+    </div>
+    <div class="satir-alt">${kacir(k.kategoriler?.ad ?? 'Kategori yok')} •
+      ${kacir(k.mahalle_metin ?? 'Mahalle belirtilmemiş')} •
+      ${kacir(k.birimler?.kisa_ad ?? k.birimler?.ad ?? 'Birim atanmamış')}
+      ${k.destekleyen_sayisi > 1 ? ` • aynı sorunu bildiren ${k.destekleyen_sayisi} kişi` : ''}</div>
+  </button>`;
+}
+
+function sayfaPanos() {
+  const birimler = new Map();
+  for (const k of KAYITLAR) {
+    const ad = k.birimler?.ad ?? 'Atanmamış';
+    const o = birimler.get(ad) ?? { ad, toplam: 0, acik: 0, yaslar: [], sureler: [] };
+    o.toplam++;
+    if (ACIK_DURUMLAR.includes(k.durum)) { o.acik++; o.yaslar.push(yasGun(k.olusturma)); }
+    if (k.cozum_tarihi) o.sureler.push((new Date(k.cozum_tarihi) - new Date(k.olusturma)) / 86400000);
+    birimler.set(ad, o);
+  }
+  const satirlar = [...birimler.values()].sort((a, b) => b.acik - a.acik);
+
+  return `
+  <div class="uyari">Bu tablo <b>hedef süre kullanmaz</b>. Her birim kendi kapanış süreleriyle gösterilir;
+    "geç kaldı" hükmünü veri değil, işi bilen yönetici verir. Derin analiz (sapma, mahalle kümelenmesi,
+    dönem kıyaslaması) için <b>Erken Uyarı Panosu</b>'nu kullanın.</div>
+  <div class="kart">
+    <div class="kart-bas"><h2>Birim durumu</h2><span class="not">son 500 kayıt</span></div>
+    <table>
+      <tr><th>Birim</th><th class="sag">Toplam</th><th class="sag">Açık</th>
+        <th class="sag">En eski açık (gün)</th><th class="sag">Açık yaşı medyan</th>
+        <th class="sag">Çözüm süresi medyan (gün)</th></tr>
+      ${satirlar.map(b => `<tr>
+        <td><b>${kacir(b.ad)}</b></td>
+        <td class="sag mono">${b.toplam}</td>
+        <td class="sag mono">${b.acik}</td>
+        <td class="sag mono">${b.yaslar.length ? Math.max(...b.yaslar).toFixed(0) : '—'}</td>
+        <td class="sag mono">${b.yaslar.length ? medyan(b.yaslar).toFixed(1) : '—'}</td>
+        <td class="sag mono">${b.sureler.length ? medyan(b.sureler).toFixed(1) : '—'}</td>
+      </tr>`).join('')}
+    </table>
+  </div>`;
+}
+
+/* ---------------- detay ve işlemler ---------------- */
+
+async function detayAc(id) {
+  const k = KAYITLAR.find(x => x.id === id);
+  const { data: hareketler } = await sb.from('sikayet_hareketleri')
+    .select('islem, not_metni, olusturma, aktor, profiller ( ad_soyad )').eq('sikayet_id', id)
+    .order('olusturma', { ascending: true });
+
+  const { data: birimler } = await sb.from('birimler').select('id, ad').eq('aktif', true).order('ad');
+
+  document.getElementById('modal').innerHTML = `
+    <div class="modal-bas">
+      <div><h2 style="font-size:15px">${kacir(k.baslik ?? '')}</h2>
+        <span class="mono" style="font-size:11px;color:var(--sis)">${kacir(k.takip_no ?? '')}</span></div>
+      <button class="btn" id="kapat">Kapat</button>
+    </div>
+    <div class="modal-ic">
+      <div class="bilgi">
+        <span>Durum</span><b>${DURUM_ADI[k.durum] ?? k.durum}</b>
+        <span>Kategori</span><div>${kacir(k.kategoriler?.ad ?? '—')}</div>
+        <span>Birim</span><div>${kacir(k.birimler?.ad ?? 'Atanmamış')}</div>
+        <span>Yer</span><div>${kacir(k.mahalle_metin ?? '—')} ${kacir(k.adres ?? '')}</div>
+        <span>Açılış</span><div>${new Date(k.olusturma).toLocaleString('tr-TR')}
+          (${yasGun(k.olusturma).toFixed(0)} gün önce)</div>
+        <span>Özet</span><div>${kacir(k.ozet ?? '')}</div>
+        ${k.ai_gerekce ? `<span>YZ gerekçesi</span><div style="color:var(--sis)">${kacir(k.ai_gerekce)}
+          (güven ${(k.ai_guven ?? 0).toFixed(2)})</div>` : ''}
+      </div>
+
+      ${k.durum === 'triyaj' ? `
+        <div class="alan"><label>Doğru birime yönlendir</label>
+          <select id="hedefBirim"><option value="">Birim seçin…</option>
+            ${(birimler ?? []).map(b => `<option value="${b.id}">${kacir(b.ad)}</option>`).join('')}</select></div>
+        <button class="btn ana" id="yonlendir">Yönlendir</button>
+      ` : ['kapandi', 'reddedildi', 'havale'].includes(k.durum) ? '' : `
+        <div class="alan"><label>Yapılan işlem / çözüm raporu</label>
+          <textarea id="notMetni" placeholder="Ne yapıldı? Kapatmak için bu alan zorunludur."></textarea></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" data-durum="islemde">İşleme aldım</button>
+          <button class="btn" data-durum="beklemede">Beklemeye al</button>
+          <button class="btn ana" data-durum="cozuldu">Çözüldü olarak kaydet</button>
+          <button class="btn kirmizi" id="iade">Bu kayıt bize ait değil</button>
+        </div>
+      `}
+
+      <div class="gecmis"><h3 style="font-size:12px;margin-bottom:8px">İşlem geçmişi</h3>
+        <ul>${(hareketler ?? []).map(h => `<li>
+          <time>${new Date(h.olusturma).toLocaleString('tr-TR')}</time>
+          <b>${kacir(h.islem)}</b> ${kacir(h.not_metni ?? '')}
+          <span style="color:var(--sis)">— ${kacir(h.profiller?.ad_soyad ?? h.aktor)}</span></li>`).join('') || '<li>Kayıt yok.</li>'}</ul>
+      </div>
+    </div>`;
+
+  document.getElementById('perde').classList.add('acik');
+  document.getElementById('kapat').onclick = modalKapat;
+
+  document.querySelectorAll('[data-durum]').forEach(b => b.onclick = () => durumIsle(k, b.dataset.durum));
+  const iade = document.getElementById('iade');
+  if (iade) iade.onclick = () => iadeEt(k);
+  const yon = document.getElementById('yonlendir');
+  if (yon) yon.onclick = () => yonlendir(k);
+}
+
+async function durumIsle(k, durum) {
+  const not = document.getElementById('notMetni')?.value?.trim() ?? '';
+  if (durum === 'cozuldu' && !not) {
+    return alert('Kaydı çözüldü olarak işaretlemek için ne yapıldığını yazmanız gerekiyor.');
+  }
+  const { error } = await sb.from('sikayetler').update({ durum }).eq('id', k.id);
+  if (error) return alert('Güncellenemedi: ' + error.message);
+
+  if (durum === 'cozuldu') {
+    await sb.from('cozum_raporlari').insert({ sikayet_id: k.id, aciklama: not });
+  } else if (not) {
+    await sb.from('sikayet_hareketleri').insert({
+      sikayet_id: k.id, kullanici_id: PROFIL.id, aktor: 'kullanici',
+      islem: 'not_eklendi', not_metni: not });
+  }
+  modalKapat(); await kayitlariGetir(); ciz();
+}
+
+async function iadeEt(k) {
+  const not = document.getElementById('notMetni')?.value?.trim() ?? '';
+  if (!not) return alert('İade için gerekçe yazmanız gerekiyor.');
+  await sb.from('sikayet_hareketleri').insert({
+    sikayet_id: k.id, kullanici_id: PROFIL.id, aktor: 'kullanici',
+    islem: 'iade', not_metni: not });
+  const { error } = await sb.from('sikayetler')
+    .update({ durum: 'triyaj', birim_id: null }).eq('id', k.id);
+  if (error) return alert(error.message);
+  modalKapat(); await kayitlariGetir(); ciz();
+}
+
+async function yonlendir(k) {
+  const birimId = document.getElementById('hedefBirim').value;
+  if (!birimId) return alert('Birim seçin.');
+  const { error } = await sb.from('sikayetler')
+    .update({ birim_id: birimId, durum: 'yeni' }).eq('id', k.id);
+  if (error) return alert(error.message);
+  await sb.from('sikayet_hareketleri').insert({
+    sikayet_id: k.id, kullanici_id: PROFIL.id, aktor: 'kullanici',
+    islem: 'yonlendirildi' });
+  modalKapat(); await kayitlariGetir(); ciz();
+}
+
+function modalKapat() { document.getElementById('perde').classList.remove('acik'); }
+document.getElementById('perde').onclick = e => { if (e.target.id === 'perde') modalKapat(); };
+
+/* ---------------- yardımcı ---------------- */
+
+function kpi(et, deger, alt) {
+  return `<div class="kpi"><div class="et">${et}</div><div class="deger">${deger}</div>
+    <div class="alt">${alt ?? ''}</div></div>`;
+}
+function yasGun(t) { return (Date.now() - new Date(t).getTime()) / 86400000; }
+function medyan(d) {
+  const s = [...d].sort((a, b) => a - b), o = Math.floor(s.length / 2);
+  return s.length % 2 ? s[o] : (s[o - 1] + s[o]) / 2;
+}
+function kacir(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+</script>
+</body>
+</html>

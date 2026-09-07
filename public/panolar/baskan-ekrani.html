@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Başkan Ekranı · Maltepe Vatandaş Talepleri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+:root{
+  --marine-900:#0F2C5C; --marine-800:#163B73; --marine-700:#1B4E97;
+  --marine-600:#2A5CAE; --rule:#2F5590;
+  --teal:#3568C9; --teal-soft:#9FC1F2;
+  --amber:#D91E28; --amber-deep:#A8121B;
+  --bone:#FFFFFF; --bone-dim:#E7ECF3; --hair:#DCE3EC;
+  --ink:#14181C; --ink-soft:#5A646E;
+  --iyi:#1B7F4B; --orta:#B5730B; --dikkat:#B71C24;
+  --iyi-bg:#E8F4ED; --orta-bg:#FBF2E0; --dikkat-bg:#FBE9EA;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bone-dim);color:var(--ink);
+  font-family:'IBM Plex Sans','Segoe UI',Arial,sans-serif;font-size:15px;line-height:1.55;}
+button{font-family:inherit;cursor:pointer;}
+select{font-family:inherit;-webkit-appearance:none;appearance:none;border-radius:0;}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px;}
+.mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+
+/* ---------- başlık ---------- */
+header{background:var(--marine-900);padding:24px 26px 22px;}
+.bas-ic{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:flex-start;}
+.kas{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--amber);}
+h1{font-family:'Oswald',sans-serif;font-weight:500;font-size:clamp(26px,3.8vw,40px);
+  letter-spacing:.01em;text-transform:uppercase;color:var(--bone);margin:6px 0 0;}
+header p.alt{color:var(--teal-soft);font-size:14px;margin:8px 0 0;max-width:560px;}
+.bas-sag{display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+.dugmeler{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+.dg{font-family:'Oswald',sans-serif;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;
+  padding:9px 16px;border:1px solid var(--rule);background:transparent;color:var(--bone);}
+.dg:hover{border-color:var(--teal-soft);}
+.dg.dolu{background:var(--amber);border-color:var(--amber);color:#fff;}
+.veri-bilgi{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--teal-soft);text-align:right;}
+
+/* ---------- açıklama şeridi ---------- */
+.ozet{background:var(--marine-800);color:#fff;padding:20px 26px;border-bottom:4px solid var(--amber);}
+.ozet h2{font-family:'Oswald',sans-serif;font-weight:400;font-size:15px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--teal-soft);margin:0 0 10px;}
+.ozet p{margin:0;font-size:17px;line-height:1.6;max-width:76ch;}
+.ozet strong{color:#fff;font-weight:600;border-bottom:2px solid var(--amber);}
+
+/* ---------- soru kartları ---------- */
+.kartlar{display:grid;gap:2px;background:var(--hair);
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));}
+.kart{background:#fff;padding:20px 22px 22px;display:flex;flex-direction:column;}
+.kart .soru{font-family:'Oswald',sans-serif;font-weight:500;font-size:16px;
+  color:var(--marine-900);margin:0 0 14px;line-height:1.3;}
+.kart .buyuk{font-family:'Oswald',sans-serif;font-size:46px;font-weight:600;line-height:1;
+  color:var(--marine-800);}
+.kart .buyuk.uyari{color:var(--dikkat);}
+.kart .birim{font-family:'Oswald',sans-serif;font-size:17px;color:var(--ink-soft);margin-left:6px;}
+.kart .cevap{font-size:14.5px;color:var(--ink-soft);margin-top:10px;line-height:1.5;}
+.kart .cevap b{color:var(--ink);font-weight:600;}
+.kart .ad{font-family:'Oswald',sans-serif;font-size:23px;font-weight:500;color:var(--marine-800);
+  line-height:1.2;text-transform:uppercase;}
+
+/* ---------- bölüm ---------- */
+.bolum{padding:26px;background:var(--bone-dim);}
+.bolum-ic{background:#fff;border:1px solid var(--hair);padding:24px 26px;}
+.bolum h2{font-family:'Oswald',sans-serif;font-weight:500;font-size:21px;color:var(--marine-900);
+  margin:0 0 6px;line-height:1.25;}
+.bolum .aciklama{font-size:14.5px;color:var(--ink-soft);margin:0 0 20px;max-width:70ch;}
+
+/* ---------- bekleme merdiveni ---------- */
+.merdiven{display:flex;flex-direction:column;gap:2px;}
+.md-satir{display:grid;grid-template-columns:minmax(150px,200px) minmax(60px,1fr) 128px;
+  gap:14px;align-items:center;padding:11px 12px;background:#fff;border:1px solid var(--hair);}
+.md-satir .etiket{font-size:15px;font-weight:500;}
+.md-satir .yuva{height:26px;background:var(--bone-dim);position:relative;}
+.md-satir .yuva i{display:block;height:100%;}
+.md-satir .sonuc{text-align:right;font-family:'Oswald',sans-serif;font-size:19px;font-weight:500;}
+.md-satir .sonuc small{display:block;font-family:'IBM Plex Sans',sans-serif;font-size:12px;
+  font-weight:400;color:var(--ink-soft);letter-spacing:0;}
+.md-satir[data-vurgu="true"]{border-color:var(--dikkat);background:var(--dikkat-bg);}
+.md-satir[data-vurgu="true"] .sonuc{color:var(--dikkat);}
+
+/* ---------- gelen-biten ---------- */
+.akis{display:flex;gap:3px;align-items:flex-end;height:190px;overflow-x:auto;padding-bottom:4px;}
+.ay{flex:1 0 46px;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;min-width:46px;}
+.ay .ciftli{display:flex;gap:2px;align-items:flex-end;height:150px;}
+.ay .ciftli span{flex:1;display:block;}
+.ay .g{background:var(--marine-600);}
+.ay .b{background:var(--teal-soft);}
+.ay .ayad{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-soft);
+  text-align:center;white-space:nowrap;}
+.efsane{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;font-size:14px;}
+.efsane span{display:flex;align-items:center;gap:8px;}
+.efsane i{width:16px;height:16px;display:block;}
+
+/* ---------- müdürlük tablosu ---------- */
+.sirala{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.sb{font-family:'IBM Plex Sans',sans-serif;font-size:13.5px;padding:8px 15px;
+  border:1px solid var(--hair);background:#fff;color:var(--ink);}
+.sb[aria-pressed=true]{background:var(--marine-800);border-color:var(--marine-800);color:#fff;}
+table{width:100%;border-collapse:collapse;}
+thead th{font-family:'Oswald',sans-serif;font-weight:500;font-size:13.5px;color:var(--marine-900);
+  text-align:left;padding:0 12px 11px;border-bottom:2px solid var(--marine-800);vertical-align:bottom;
+  line-height:1.3;}
+thead th.sag{text-align:right;}
+thead th small{display:block;font-family:'IBM Plex Sans',sans-serif;font-size:11.5px;
+  font-weight:400;color:var(--ink-soft);}
+tbody td{padding:13px 12px;border-bottom:1px solid var(--hair);font-size:15px;vertical-align:middle;}
+tbody td.sag{text-align:right;font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+tbody tr:hover{background:var(--bone-dim);}
+.mad{font-family:'Oswald',sans-serif;font-size:15px;text-transform:uppercase;letter-spacing:.02em;}
+.rozet{display:inline-block;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.08em;
+  text-transform:uppercase;padding:4px 11px;white-space:nowrap;}
+.rozet.iyi{background:var(--iyi-bg);color:var(--iyi);}
+.rozet.orta{background:var(--orta-bg);color:var(--orta);}
+.rozet.dikkat{background:var(--dikkat-bg);color:var(--dikkat);}
+.minibar{height:9px;background:var(--bone-dim);min-width:44px;}
+.minibar i{display:block;height:100%;}
+
+/* ---------- eski işler listesi ---------- */
+.eski{display:flex;flex-direction:column;}
+.ei{display:grid;grid-template-columns:96px minmax(0,1fr) minmax(0,190px);gap:16px;
+  padding:13px 12px;border-bottom:1px solid var(--hair);align-items:center;}
+.ei:hover{background:var(--bone-dim);}
+.ei .gun{font-family:'Oswald',sans-serif;font-size:21px;font-weight:500;color:var(--dikkat);}
+.ei .gun small{display:block;font-family:'IBM Plex Sans',sans-serif;font-size:11.5px;
+  font-weight:400;color:var(--ink-soft);}
+.ei .konu{font-size:15px;}
+.ei .konu small{display:block;font-size:13px;color:var(--ink-soft);margin-top:2px;}
+.ei .md{font-family:'Oswald',sans-serif;font-size:13px;text-transform:uppercase;
+  color:var(--marine-700);text-align:right;}
+
+/* ---------- not ---------- */
+.not{background:#FFF8E6;border:1px solid #E8C97A;border-left:5px solid #C8901E;
+  padding:16px 20px;margin:0 26px 26px;font-size:14.5px;line-height:1.6;}
+.not b{display:block;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:.05em;
+  text-transform:uppercase;color:#8A6410;margin-bottom:5px;}
+
+/* ---------- boş ekran ---------- */
+.bos{padding:70px 26px;text-align:center;background:#fff;margin:26px;border:2px dashed var(--hair);}
+.bos h2{font-family:'Oswald',sans-serif;font-weight:500;font-size:24px;color:var(--marine-900);margin:0 0 10px;}
+.bos p{color:var(--ink-soft);max-width:52ch;margin:0 auto 22px;}
+.bos.suruklen{border-color:var(--amber);background:var(--dikkat-bg);}
+
+footer{background:var(--marine-900);color:var(--teal-soft);padding:20px 26px;font-size:13px;}
+
+@media(max-width:700px){
+  .md-satir{grid-template-columns:minmax(110px,1fr) 110px;}
+  .md-satir .yuva{display:none;}
+  .ei{grid-template-columns:82px 1fr;}
+  .ei .md{grid-column:2;text-align:left;}
+  thead th.gizle-mobil,tbody td.gizle-mobil{display:none;}
+}
+@media print{
+  body{background:#fff;}
+  .dugmeler,.bos,footer,.sirala{display:none;}
+  .bolum{padding:12px 0;background:#fff;}
+  .bolum-ic{border:none;padding:0;}
+  header{background:#fff;color:#000;border-bottom:3px solid #000;}
+  h1,.kas{color:#000;}
+  header p.alt,.veri-bilgi{color:#333;}
+  .ozet{background:#f0f0f0;color:#000;}
+  .ozet p,.ozet strong{color:#000;}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bas-ic">
+    <div>
+      <div class="kas">Maltepe Belediyesi · Yönetim Özeti</div>
+      <h1>Başkan Ekranı</h1>
+      <p class="alt">Vatandaş talepleri şu an nerede duruyor, hangi müdürlüğün eli dolu, işler birikiyor mu.</p>
+    </div>
+    <div class="bas-sag">
+      <div class="dugmeler">
+        <button class="dg dolu" id="btnYenile">Yenile</button>
+        <button class="dg" id="btnYukle">Dosyadan yükle</button>
+        <button class="dg" id="btnYazdir">Yazdır</button>
+      </div>
+      <div class="veri-bilgi" id="veriBilgi">Bağlanıyor…</div>
+    </div>
+  </div>
+</header>
+
+<input type="file" id="dosya" accept=".csv,.txt" hidden />
+
+<div id="bosEkran" class="bos" hidden>
+  <h2 id="bosBaslik">Canlı veriye ulaşılamadı</h2>
+  <p id="bosMetin">Sunucudan otomatik veri çekmeyi az önce denedim ama başarılı olamadım.
+     İstersen bir CSV dosyasını elle yükleyebilir ya da tekrar deneyebilirsin.</p>
+  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+    <button class="dg dolu" id="btnTekrarDene" style="border-color:var(--amber)">Tekrar dene</button>
+    <button class="dg dolu" id="btnYukle2" style="border-color:var(--amber)">Dosyadan yükle</button>
+  </div>
+</div>
+
+<main id="icerik" hidden>
+
+  <section class="ozet">
+    <h2>Bu ekran özetle ne diyor</h2>
+    <p id="anlati"></p>
+  </section>
+
+  <section class="kartlar" id="kartlar"></section>
+
+  <div id="notAlani"></div>
+
+  <section class="bolum">
+    <div class="bolum-ic">
+      <h2>Bekleyen işler ne kadardır bekliyor</h2>
+      <p class="aciklama">Bugün itibarıyla henüz bitmemiş işleri, ne kadar süredir beklediklerine göre
+        dört gruba ayırdık. Birkaç gündür bekleyen iş normaldir; asıl bakılması gereken en alttaki satırdır.</p>
+      <div class="merdiven" id="merdiven"></div>
+    </div>
+  </section>
+
+  <section class="bolum" style="padding-top:0">
+    <div class="bolum-ic">
+      <h2>Her ay kaç iş geldi, kaç iş bitti</h2>
+      <p class="aciklama">Koyu sütun o ay gelen başvuruları, açık sütun o ay bitirilen işleri gösterir.
+        Koyu sütun sürekli açık sütundan yüksekse iş birikiyor demektir.</p>
+      <div class="akis" id="akis"></div>
+      <div class="efsane">
+        <span><i style="background:var(--marine-600)"></i> O ay gelen başvuru</span>
+        <span><i style="background:var(--teal-soft)"></i> O ay bitirilen iş</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="bolum" style="padding-top:0">
+    <div class="bolum-ic">
+      <h2>Müdürlükler ne durumda</h2>
+      <p class="aciklama">En çok iş alan müdürlüğün elinde doğal olarak daha çok iş birikir. Bu yüzden
+        ham sayının yanına “gelen her 100 işten kaçı hâlâ bekliyor” sütununu koyduk — müdürlükleri
+        birbiriyle adil karşılaştırmanın yolu budur.</p>
+      <div class="sirala" id="sirala"></div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Müdürlük</th>
+              <th class="sag">Bekleyen iş<small>şu an elinde</small></th>
+              <th class="sag gizle-mobil">Gelen 100 işten<small>kaçı hâlâ bekliyor</small></th>
+              <th class="sag">Bitirme süresi<small>genelde kaç gün</small></th>
+              <th class="sag gizle-mobil">En eski işi<small>gün</small></th>
+              <th class="sag">Durum</th>
+            </tr>
+          </thead>
+          <tbody id="mdGovde"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="bolum" style="padding-top:0">
+    <div class="bolum-ic">
+      <h2>En uzun süredir bekleyen 12 iş</h2>
+      <p class="aciklama">Bu listedeki işlerin bir kısmı gerçekten yapılmamış olabilir; bir kısmı ise
+        yapılmış ama sistemde kapatılmamış olabilir. İkisi de takip gerektirir.</p>
+      <div class="eski" id="eskiListe"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Bu ekran yüklenen dosyadaki bilgileri özetler, veriyi değiştirmez.
+  Sayılar dosyadaki en son başvuru tarihine göre hesaplanır.
+</footer>
+
+<script>
+'use strict';
+
+const AY_ADI = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+const AY_UZUN = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+
+const sayi = n => Number(n).toLocaleString('tr-TR');
+const ondalik = (n, b = 1) => Number(n).toLocaleString('tr-TR', {minimumFractionDigits: b, maximumFractionDigits: b});
+
+/* Tarih ayrıştırma: "01.07.2025 22:40" ve yaygın varyantlar */
+function tarihOku(s) {
+  if (!s) return null;
+  const t = String(s).trim();
+  if (!t) return null;
+  let m = t.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})(?:[ T](\d{1,2}):(\d{2}))?/);
+  if (m) return new Date(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0));
+  m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
+  if (m) return new Date(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0));
+  const d = new Date(t);
+  return isNaN(d) ? null : d;
+}
+const gunFarki = (a, b) => Math.floor((b - a) / 86400000);
+const ortanca = a => {
+  if (!a.length) return 0;
+  const s = [...a].sort((x, y) => x - y);
+  const i = s.length >> 1;
+  return s.length % 2 ? s[i] : (s[i - 1] + s[i]) / 2;
+};
+const yuzdelik = (a, p) => {
+  if (!a.length) return 0;
+  const s = [...a].sort((x, y) => x - y);
+  return s[Math.min(s.length - 1, Math.floor(s.length * p))];
+};
+
+let DURUM = { kayitlar: [], bugun: null, md: [], siralama: 'bekleyen' };
+
+/* ---------- otomatik veri çekme ----------
+   Bu dosya /panolar/ altında barındırıldığında, aynı sunucudaki
+   /panolar/veri.csv adresi Supabase'deki canlı kayıtları döner.
+   O adres zaten şifreyle korunuyor (aynı /panolar parolası), bu yüzden
+   burada ayrıca bir anahtar taşımaya gerek yok. */
+const CANLI_VERI_URL = './veri.csv';
+const OTOMATIK_YENILEME_DK = 5;
+let yenilemeSayaci = null;
+
+async function canliVeriYukle(sessiz = false) {
+  document.getElementById('veriBilgi').textContent = 'Bağlanıyor…';
+  try {
+    const cevap = await fetch(CANLI_VERI_URL + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!cevap.ok) throw new Error('Sunucu ' + cevap.status + ' döndü');
+    const metin = await cevap.text();
+    const ayristirilmis = Papa.parse(metin, { header: true, skipEmptyLines: true });
+    if (!ayristirilmis.data.length) throw new Error('Sunucudan boş veri geldi');
+    hazirla(ayristirilmis.data, 'canlı veri');
+    if (OTOMATIK_YENILEME_DK > 0 && !yenilemeSayaci) {
+      yenilemeSayaci = setInterval(() => canliVeriYukle(true), OTOMATIK_YENILEME_DK * 60000);
+    }
+  } catch (err) {
+    if (!sessiz) bosGoster(err.message);
+    else document.getElementById('veriBilgi').textContent = 'Son güncel veri gösteriliyor (yenileme başarısız)';
+  }
+}
+
+function bosGoster(hataMetni) {
+  document.getElementById('bosBaslik').textContent = 'Canlı veriye ulaşılamadı';
+  document.getElementById('bosMetin').textContent =
+    'Sunucudan otomatik veri çekmeyi denedim: ' + hataMetni +
+    '. İstersen bir CSV dosyasını elle yükleyebilir ya da tekrar deneyebilirsin.';
+  document.getElementById('bosEkran').hidden = false;
+  document.getElementById('icerik').hidden = true;
+  document.getElementById('veriBilgi').textContent = 'Bağlantı yok';
+}
+
+/* ---------- dosya yükleme (yalnızca yedek yol) ---------- */
+const dosyaEl = document.getElementById('dosya');
+const bosEl = document.getElementById('bosEkran');
+document.getElementById('btnYukle').onclick = () => dosyaEl.click();
+document.getElementById('btnYukle2').onclick = () => dosyaEl.click();
+document.getElementById('btnTekrarDene').onclick = () => canliVeriYukle();
+document.getElementById('btnYenile').onclick = () => canliVeriYukle();
+document.getElementById('btnYazdir').onclick = () => window.print();
+dosyaEl.onchange = e => { if (e.target.files[0]) dosyaOku(e.target.files[0]); };
+
+['dragenter', 'dragover'].forEach(t => bosEl.addEventListener(t, e => {
+  e.preventDefault(); bosEl.classList.add('suruklen');
+}));
+['dragleave', 'drop'].forEach(t => bosEl.addEventListener(t, e => {
+  e.preventDefault(); bosEl.classList.remove('suruklen');
+}));
+bosEl.addEventListener('drop', e => {
+  const f = e.dataTransfer.files[0];
+  if (f) dosyaOku(f);
+});
+
+function dosyaOku(dosya) {
+  Papa.parse(dosya, {
+    header: true, skipEmptyLines: true, delimiter: '',
+    encoding: 'UTF-8',
+    complete: r => {
+      try {
+        hazirla(r.data, dosya.name);
+      } catch (err) {
+        alert('Dosya okunamadı: ' + err.message + '\n\nBeklenen sütunlar: Başvuru Tarihi, Kapanış Tarihi, Durum, İlgili Müdürlük, Mahalle, Başvuru Konusu');
+      }
+    },
+    error: err => alert('Dosya okunamadı: ' + err.message)
+  });
+}
+
+/* sütun adını esnek bul */
+function sut(satir, ...adaylar) {
+  const anahtarlar = Object.keys(satir);
+  for (const a of adaylar) {
+    const b = anahtarlar.find(k => k.toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim() === a.toLocaleLowerCase('tr'));
+    if (b) return b;
+  }
+  return null;
+}
+
+function hazirla(ham, dosyaAdi) {
+  if (!ham.length) throw new Error('Dosya boş görünüyor.');
+  const ilk = ham[0];
+  const kBas = sut(ilk, 'Başvuru Tarihi', 'Basvuru Tarihi', 'Tarih');
+  const kKap = sut(ilk, 'Kapanış Tarihi', 'Kapanis Tarihi', 'Çözüm Tarihi');
+  const kDur = sut(ilk, 'Durum');
+  const kMd = sut(ilk, 'İlgili Müdürlük', 'Ilgili Mudurluk', 'Müdürlük', 'Birim');
+  const kMah = sut(ilk, 'Mahalle');
+  const kKonu = sut(ilk, 'Başvuru Konusu', 'Konu');
+  const kNo = sut(ilk, 'Başvuru No', 'No');
+  if (!kBas || !kDur) throw new Error('“Başvuru Tarihi” ve “Durum” sütunları bulunamadı.');
+
+  const kayitlar = [];
+  for (const r of ham) {
+    const bas = tarihOku(r[kBas]);
+    if (!bas) continue;
+    const durumHam = (r[kDur] || '').trim();
+    const kapali = /kapan|çözül|cozul|tamamlan|sonuçlan/i.test(durumHam);
+    kayitlar.push({
+      no: kNo ? r[kNo] : '',
+      bas,
+      kap: kKap ? tarihOku(r[kKap]) : null,
+      kapali,
+      md: (kMd ? r[kMd] : '') || 'Belirtilmemiş',
+      mah: (kMah ? r[kMah] : '') || '',
+      konu: (kKonu ? r[kKonu] : '') || 'Başvuru'
+    });
+  }
+  if (!kayitlar.length) throw new Error('Geçerli tarih içeren kayıt bulunamadı.');
+
+  const bugun = new Date(Math.max(...kayitlar.map(k => k.bas.getTime())));
+  DURUM = { kayitlar, bugun, md: [], siralama: 'bekleyen' };
+
+  document.getElementById('veriBilgi').innerHTML =
+    sayi(kayitlar.length) + ' kayıt<br>Son tarih: ' + bugun.getDate() + ' ' + AY_ADI[bugun.getMonth()] + ' ' + bugun.getFullYear();
+
+  bosEl.hidden = true;
+  document.getElementById('icerik').hidden = false;
+  ciz();
+}
+
+/* ---------- hesaplama + çizim ---------- */
+function ciz() {
+  const { kayitlar, bugun } = DURUM;
+  const bekleyen = kayitlar.filter(k => !k.kapali);
+  const biten = kayitlar.filter(k => k.kapali && k.kap);
+
+  /* kartlar */
+  const bekleyenOran = bekleyen.length / kayitlar.length * 100;
+  const sureler = biten.map(k => gunFarki(k.bas, k.kap)).filter(d => d >= 0);
+  const tipik = Math.round(ortanca(sureler));
+  const p90 = Math.round(yuzdelik(sureler, 0.9));
+
+  const g30 = new Date(bugun.getTime() - 30 * 86400000);
+  const g60 = new Date(bugun.getTime() - 60 * 86400000);
+  const geldiSon = kayitlar.filter(k => k.bas >= g30).length;
+  const bittiSon = biten.filter(k => k.kap >= g30).length;
+  const geldiOnce = kayitlar.filter(k => k.bas >= g60 && k.bas < g30).length;
+  const bittiOnce = biten.filter(k => k.kap >= g60 && k.kap < g30).length;
+  const fark = geldiSon - bittiSon, farkOnce = geldiOnce - bittiOnce;
+
+  const yaslar = bekleyen.map(k => ({ k, g: gunFarki(k.bas, bugun) })).sort((a, b) => b.g - a.g);
+  const enEski = yaslar[0];
+
+  /* müdürlük tablosu */
+  const harita = new Map();
+  for (const k of kayitlar) {
+    if (!harita.has(k.md)) harita.set(k.md, { ad: k.md, toplam: 0, bekleyen: 0, sure: [], eski: 0 });
+    const o = harita.get(k.md);
+    o.toplam++;
+    if (k.kapali) { if (k.kap) { const d = gunFarki(k.bas, k.kap); if (d >= 0) o.sure.push(d); } }
+    else { o.bekleyen++; o.eski = Math.max(o.eski, gunFarki(k.bas, bugun)); }
+  }
+  const md = [...harita.values()].map(o => {
+    o.oran = o.toplam ? o.bekleyen / o.toplam * 100 : 0;
+    o.tipik = o.sure.length ? ortanca(o.sure) : 0;
+    o.puan = (o.oran > 17 ? 2 : o.oran > 14 ? 1 : 0) + (o.tipik > 10 ? 2 : o.tipik > 6 ? 1 : 0);
+    o.seviye = o.puan >= 3 ? 'dikkat' : o.puan >= 1 ? 'orta' : 'iyi';
+    return o;
+  });
+  DURUM.md = md;
+
+  const enYuklu = [...md].sort((a, b) => b.bekleyen - a.bekleyen)[0];
+  const dikkatSayi = md.filter(o => o.seviye === 'dikkat').length;
+
+  /* --- anlatı --- */
+  const uzunSure = yaslar.filter(y => y.g >= 90).length;
+  document.getElementById('anlati').innerHTML =
+    'Bugüne kadar gelen <strong>' + sayi(kayitlar.length) + '</strong> başvurunun ' +
+    '<strong>' + sayi(bekleyen.length) + '</strong> tanesi hâlâ bekliyor. ' +
+    'Bunların <strong>' + sayi(uzunSure) + '</strong> tanesi üç aydan uzun süredir açık duruyor. ' +
+    'Biten işler genelde <strong>' + tipik + ' gün</strong> içinde tamamlanıyor, ' +
+    'yani sistem hızlı çalışıyor ama eski işler geride kalıyor. ' +
+    'Son 30 günde gelen başvurular bitenlerden <strong>' + sayi(Math.abs(fark)) + '</strong> ' +
+    (fark > 0 ? 'fazla, yani iş birikmeye devam ediyor. ' : 'az, yani birikmiş iş eritiliyor. ') +
+    'Şu an eli en dolu müdürlük <strong>' + enYuklu.ad + '</strong>' +
+    (dikkatSayi ? ', ayrıca <strong>' + dikkatSayi + ' müdürlük</strong> dikkat gerektiriyor.' : '.');
+
+  /* --- kartlar --- */
+  const farkYon = fark > farkOnce ? 'Geçen aya göre birikme artıyor.'
+    : fark < farkOnce ? 'Geçen aya göre birikme yavaşlıyor.' : 'Geçen ayla aynı seviyede.';
+  document.getElementById('kartlar').innerHTML = `
+    <div class="kart">
+      <p class="soru">Şu an kaç iş bekliyor?</p>
+      <div class="buyuk">${sayi(bekleyen.length)}</div>
+      <p class="cevap">Gelen her 100 başvurudan <b>${Math.round(bekleyenOran)}</b> tanesi henüz bitmedi.</p>
+    </div>
+    <div class="kart">
+      <p class="soru">İşler birikiyor mu?</p>
+      <div class="buyuk ${fark > 0 ? 'uyari' : ''}">${fark > 0 ? '+' : ''}${sayi(fark)}</div>
+      <p class="cevap">Son 30 günde <b>${sayi(geldiSon)}</b> iş geldi, <b>${sayi(bittiSon)}</b> iş bitti. ${farkYon}</p>
+    </div>
+    <div class="kart">
+      <p class="soru">Bir iş genelde kaç günde bitiyor?</p>
+      <div class="buyuk">${tipik}<span class="birim">gün</span></div>
+      <p class="cevap">Biten <b>10 işten 9'u</b> ${p90} gün içinde tamamlanmış.</p>
+    </div>
+    <div class="kart">
+      <p class="soru">En uzun bekleyen iş hangisi?</p>
+      <div class="buyuk uyari">${sayi(enEski.g)}<span class="birim">gün</span></div>
+      <p class="cevap"><b>${enEski.k.konu}</b>${enEski.k.mah ? ' · ' + enEski.k.mah : ''}<br>${enEski.k.md}</p>
+    </div>
+    <div class="kart">
+      <p class="soru">Eli en dolu müdürlük?</p>
+      <div class="ad">${enYuklu.ad.replace(/ Müdürlüğü$/, '')}</div>
+      <p class="cevap"><b>${sayi(enYuklu.bekleyen)}</b> bekleyen iş var. Gelen 100 işten <b>${Math.round(enYuklu.oran)}</b> tanesi hâlâ açık.</p>
+    </div>`;
+
+  /* --- uyarı notu --- */
+  const notAlani = document.getElementById('notAlani');
+  if (uzunSure / Math.max(1, bekleyen.length) > 0.4) {
+    notAlani.innerHTML = `<div class="not"><b>Bir konuya dikkat</b>
+      Bekleyen işlerin <b>%${Math.round(uzunSure / bekleyen.length * 100)}</b>'i üç aydan uzun süredir açık,
+      buna karşılık biten işler ortalama ${tipik} günde kapanıyor. Bu ikisi bir arada olduğunda genellikle
+      tek bir sebep vardır: işler sahada yapılmış ama sistemde kapatılmamıştır. Rakamlara güvenmeden önce
+      en eski 20-30 kaydın gerçekten açık olup olmadığını ilgili müdürlüklere teyit ettirmek gerekir.</div>`;
+  } else notAlani.innerHTML = '';
+
+  /* --- merdiven --- */
+  const kovalar = [
+    { ad: 'Bir haftadan az', alt: 'normal sayılır', f: g => g < 7, renk: 'var(--iyi)' },
+    { ad: 'Bir hafta – bir ay', alt: 'takip edilmeli', f: g => g >= 7 && g < 30, renk: 'var(--marine-600)' },
+    { ad: 'Bir – üç ay', alt: 'gecikmiş', f: g => g >= 30 && g < 90, renk: 'var(--orta)' },
+    { ad: 'Üç aydan uzun', alt: 'acilen bakılmalı', f: g => g >= 90, renk: 'var(--dikkat)' }
+  ];
+  const enBuyuk = Math.max(...kovalar.map(k => yaslar.filter(y => k.f(y.g)).length), 1);
+  document.getElementById('merdiven').innerHTML = kovalar.map(k => {
+    const n = yaslar.filter(y => k.f(y.g)).length;
+    const yuzde = bekleyen.length ? n / bekleyen.length * 100 : 0;
+    const vurgu = k.ad === 'Üç aydan uzun' && yuzde > 30;
+    return `<div class="md-satir" data-vurgu="${vurgu}">
+      <div><div class="etiket">${k.ad}</div>
+        <div style="font-size:12.5px;color:var(--ink-soft)">${k.alt}</div></div>
+      <div class="yuva"><i style="width:${n / enBuyuk * 100}%;background:${k.renk}"></i></div>
+      <div class="sonuc">${sayi(n)} iş<small>bekleyenlerin %${Math.round(yuzde)}'i</small></div>
+    </div>`;
+  }).join('');
+
+  /* --- aylık akış --- */
+  const aylar = new Map();
+  const anah = d => d.getFullYear() + '-' + String(d.getMonth()).padStart(2, '0');
+  for (const k of kayitlar) {
+    const a = anah(k.bas);
+    if (!aylar.has(a)) aylar.set(a, { d: new Date(k.bas.getFullYear(), k.bas.getMonth(), 1), g: 0, b: 0 });
+    aylar.get(a).g++;
+  }
+  for (const k of biten) {
+    const a = anah(k.kap);
+    if (!aylar.has(a)) aylar.set(a, { d: new Date(k.kap.getFullYear(), k.kap.getMonth(), 1), g: 0, b: 0 });
+    aylar.get(a).b++;
+  }
+  const dizi = [...aylar.values()].sort((a, b) => a.d - b.d).slice(-14);
+  const tepe = Math.max(...dizi.flatMap(a => [a.g, a.b]), 1);
+  document.getElementById('akis').innerHTML = dizi.map(a => `
+    <div class="ay" title="${AY_UZUN[a.d.getMonth()]} ${a.d.getFullYear()}: ${a.g} geldi, ${a.b} bitti">
+      <div class="ciftli">
+        <span class="g" style="height:${a.g / tepe * 100}%"></span>
+        <span class="b" style="height:${a.b / tepe * 100}%"></span>
+      </div>
+      <div class="ayad">${AY_ADI[a.d.getMonth()]}<br>${String(a.d.getFullYear()).slice(2)}</div>
+    </div>`).join('');
+
+  cizTablo();
+
+  /* --- en eski işler --- */
+  document.getElementById('eskiListe').innerHTML = yaslar.slice(0, 12).map(y => `
+    <div class="ei">
+      <div class="gun">${sayi(y.g)}<small>gündür bekliyor</small></div>
+      <div class="konu">${y.k.konu}<small>${y.k.mah || '—'}${y.k.no ? ' · ' + y.k.no : ''}</small></div>
+      <div class="md">${y.k.md.replace(/ Müdürlüğü$/, '')}</div>
+    </div>`).join('');
+}
+
+/* --- sıralama düğmeleri + tablo --- */
+const SIRALAR = [
+  { id: 'bekleyen', ad: 'En çok bekleyen işi olan', f: (a, b) => b.bekleyen - a.bekleyen },
+  { id: 'oran', ad: 'Oransal olarak en çok biriktiren', f: (a, b) => b.oran - a.oran },
+  { id: 'sure', ad: 'İşi en geç bitiren', f: (a, b) => b.tipik - a.tipik }
+];
+
+function cizTablo() {
+  document.getElementById('sirala').innerHTML = SIRALAR.map(s =>
+    `<button class="sb" data-s="${s.id}" aria-pressed="${DURUM.siralama === s.id}">${s.ad}</button>`).join('');
+  document.querySelectorAll('.sb').forEach(b => b.onclick = () => {
+    DURUM.siralama = b.dataset.s; cizTablo();
+  });
+
+  const s = SIRALAR.find(x => x.id === DURUM.siralama);
+  const md = [...DURUM.md].sort(s.f);
+  const enB = Math.max(...md.map(o => o.bekleyen), 1);
+  const etiket = { iyi: 'İyi', orta: 'Orta', dikkat: 'Dikkat' };
+
+  document.getElementById('mdGovde').innerHTML = md.map(o => `
+    <tr>
+      <td><span class="mad">${o.ad.replace(/ Müdürlüğü$/, '')}</span></td>
+      <td class="sag">
+        <div style="display:flex;align-items:center;gap:9px;justify-content:flex-end">
+          <span class="minibar" style="width:58px"><i style="width:${o.bekleyen / enB * 100}%;background:var(--${o.seviye === 'dikkat' ? 'dikkat' : 'marine-600'})"></i></span>
+          <b>${sayi(o.bekleyen)}</b>
+        </div>
+      </td>
+      <td class="sag gizle-mobil">${Math.round(o.oran)}</td>
+      <td class="sag">${ondalik(o.tipik, o.tipik < 10 ? 1 : 0)}</td>
+      <td class="sag gizle-mobil">${sayi(o.eski)}</td>
+      <td class="sag"><span class="rozet ${o.seviye}">${etiket[o.seviye]}</span></td>
+    </tr>`).join('');
+}
+
+/* Sayfa açılır açılmaz canlı veriyi çekmeyi dene. */
+canliVeriYukle();
+</script>
+</body>
+</html>

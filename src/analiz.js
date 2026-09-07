@@ -131,6 +131,24 @@ export function analizUclariniBagla(app) {
     }
   });
 
+  // ---------------------------------------------------------------------
+  // Başkan ekranı ve erken uyarı panosu için: /panolar/ altında olduğu
+  // için index.js'teki ortak Basic Auth burayı da otomatik korur —
+  // ayrı bir ?anahtar= taşımaya gerek yok. Panolar bu adrese sessizce
+  // fetch atıp sayfa açılır açılmaz güncel veriyi gösterir.
+  // ---------------------------------------------------------------------
+  app.get('/panolar/veri.csv', async (req, reply) => {
+    try {
+      const satirlar = await canliSatirlar(Number(req.query.gun ?? 730));
+      reply.header('Content-Type', 'text/csv; charset=utf-8');
+      reply.header('Cache-Control', 'no-store');
+      return satirlarCsvYap(satirlar);
+    } catch (e) {
+      req.log.error({ e }, 'Panolar CSV üretilemedi');
+      return reply.code(500).send('Hata: ' + e.message);
+    }
+  });
+
   // Haftalık rapor — cron ile tetiklenir, çıktı e-postayla gider
   app.post('/analiz/haftalik-rapor', async (req, reply) => {
     if (req.headers['x-gorev-anahtari'] !== process.env.GOREV_ANAHTARI) {

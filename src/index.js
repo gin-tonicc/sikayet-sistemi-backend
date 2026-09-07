@@ -10,6 +10,11 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
 import crypto from 'node:crypto';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import fastifyStatic from '@fastify/static';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { mesajIsle } from './konusma.js';
 import { db } from './db.js';
 import { analizUclariniBagla } from './analiz.js';
@@ -206,6 +211,38 @@ app.addHook('onRequest', async (req, reply) => {
   reply.header('Access-Control-Allow-Headers', 'Content-Type, x-panel-anahtari');
   reply.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   if (req.method === 'OPTIONS') return reply.code(204).send();
+});
+
+// ---------------------------------------------------------------------
+// 3.5 Panolar — şifreli statik ekranlar (yönetime gösterilen inceleme
+//     ekranları: erken uyarı panosu, başkan ekranı). Birim paneli bu
+//     kapsamda değil, o kendi Supabase girişini kullanıyor.
+//     Tarayıcı /panolar/... adresine gidince otomatik şifre kutusu açar.
+// ---------------------------------------------------------------------
+app.addHook('onRequest', async (req, reply) => {
+  if (!req.url.startsWith('/panolar')) return;
+
+  const beklenenKullanici = process.env.PANO_KULLANICI;
+  const beklenenSifre = process.env.PANO_SIFRE;
+  if (!beklenenKullanici || !beklenenSifre) {
+    app.log.error('PANO_KULLANICI / PANO_SIFRE tanımlı değil — panolar kapalı');
+    return reply.code(503).send('Panolar şu an yapılandırılmamış');
+  }
+
+  const gelen = req.headers.authorization ?? '';
+  const beklenen = 'Basic ' + Buffer.from(`${beklenenKullanici}:${beklenenSifre}`).toString('base64');
+  const gecerli = gelen.length === beklenen.length &&
+    crypto.timingSafeEqual(Buffer.from(gelen), Buffer.from(beklenen));
+
+  if (!gecerli) {
+    reply.header('WWW-Authenticate', 'Basic realm="Maltepe Panolar"');
+    return reply.code(401).send('Yetkisiz');
+  }
+});
+
+app.register(fastifyStatic, {
+  root: path.join(__dirname, '..', 'public', 'panolar'),
+  prefix: '/panolar/',
 });
 
 // ---------------------------------------------------------------------
