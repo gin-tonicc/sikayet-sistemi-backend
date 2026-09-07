@@ -121,6 +121,17 @@ tbody tr:hover{background:var(--bone-dim);}
 .minibar{height:9px;background:var(--bone-dim);min-width:44px;}
 .minibar i{display:block;height:100%;}
 
+/* ---------- mahalle / konu sıralama listeleri ---------- */
+.sl-satir{display:grid;grid-template-columns:minmax(0,1fr) minmax(60px,110px) 70px;
+  gap:12px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--hair);}
+.sl-satir:first-child{padding-top:2px;}
+.sl-satir .ad{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sl-satir .yuva{height:10px;background:var(--bone-dim);}
+.sl-satir .yuva i{display:block;height:100%;background:var(--marine-600);}
+.sl-satir[data-birinci="true"] .yuva i{background:var(--dikkat);}
+.sl-satir .say{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px;}
+.sl-satir .say small{display:block;font-size:11px;color:var(--ink-soft);}
+
 /* ---------- eski işler listesi ---------- */
 .eski{display:flex;flex-direction:column;}
 .ei{display:grid;grid-template-columns:96px minmax(0,1fr) minmax(0,190px);gap:16px;
@@ -255,6 +266,24 @@ footer{background:var(--marine-900);color:var(--teal-soft);padding:20px 26px;fon
           </thead>
           <tbody id="mdGovde"></tbody>
         </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="bolum" style="padding-top:0">
+    <div class="bolum-ic">
+      <h2>En çok şikayet nereden ve ne hakkında geliyor</h2>
+      <p class="aciklama">Toplam <span id="mkToplamAciklama"></span> başvurunun mahalle ve konu bazında
+        dağılımı. Buradaki sıralama tüm zamanları kapsar — açık ya da kapalı, her başvuru sayılır.</p>
+      <div class="izgara-esit">
+        <div>
+          <div class="etiket" style="margin-bottom:10px">Mahalleler</div>
+          <div class="sl" id="mahalleListe"></div>
+        </div>
+        <div>
+          <div class="etiket" style="margin-bottom:10px">Konular</div>
+          <div class="sl" id="konuListe"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -577,6 +606,7 @@ function ciz() {
     </div>`).join('');
 
   cizTablo();
+  cizMahalleKonu(kayitlar);
 
   /* --- en eski işler --- */
   document.getElementById('eskiListe').innerHTML = yaslar.slice(0, 12).map(y => `
@@ -585,6 +615,34 @@ function ciz() {
       <div class="konu">${y.k.konu}<small>${y.k.mah || '—'}${y.k.no ? ' · ' + y.k.no : ''}</small></div>
       <div class="md">${y.k.md.replace(/ Müdürlüğü$/, '')}</div>
     </div>`).join('');
+}
+
+/* --- mahalle / konu sıralaması --- */
+function cizMahalleKonu(kayitlar) {
+  document.getElementById('mkToplamAciklama').textContent = sayi(kayitlar.length);
+
+  const say = (alan, bosEtiket) => {
+    const harita = new Map();
+    for (const k of kayitlar) {
+      const ad = (k[alan] || '').trim() || bosEtiket;
+      harita.set(ad, (harita.get(ad) || 0) + 1);
+    }
+    return [...harita.entries()].sort((a, b) => b[1] - a[1]);
+  };
+
+  const cizListe = (elId, dizi, toplam) => {
+    const ilk10 = dizi.slice(0, 10);
+    const enBuyuk = ilk10.length ? ilk10[0][1] : 1;
+    document.getElementById(elId).innerHTML = ilk10.map(([ad, n], i) => `
+      <div class="sl-satir" data-birinci="${i === 0}">
+        <div class="ad">${ad}</div>
+        <div class="yuva"><i style="width:${n / enBuyuk * 100}%"></i></div>
+        <div class="say">${sayi(n)}<small>%${Math.round(n / toplam * 100)}</small></div>
+      </div>`).join('') || '<p style="color:var(--ink-soft);font-size:14px">Veride bu alan bulunamadı.</p>';
+  };
+
+  cizListe('mahalleListe', say('mah', 'Belirtilmemiş'), kayitlar.length);
+  cizListe('konuListe', say('konu', 'Belirtilmemiş'), kayitlar.length);
 }
 
 /* --- sıralama düğmeleri + tablo --- */
