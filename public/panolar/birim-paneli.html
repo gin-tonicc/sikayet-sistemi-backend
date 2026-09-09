@@ -3,99 +3,161 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Birim Paneli — Şikayet Yönetim Sistemi</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Birim Paneli · Maltepe Belediyesi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root{--murekkep:#0F1F33;--kobalt:#1B4A9C;--turkuaz:#1F8A7A;--kehribar:#D08A17;--mercan:#D4432A;
-  --zemin:#E9EDF1;--yuzey:#fff;--kum:#C9D2DB;--sis:#5C6B7A;--koyu-sis:#33404E;--r:3px}
+:root{
+  --marine-900:#0F2C5C; --marine-800:#163B73; --marine-700:#1B4E97; --marine-600:#2A5CAE;
+  --rule:#2F5590; --teal-soft:#9FC1F2;
+  --bone:#FFFFFF; --bone-dim:#EEF2F7; --hair:#DCE3EC;
+  --ink:#14181C; --ink-soft:#5A646E;
+  --iyi:#1B7F4B; --iyi-bg:#E8F4ED;
+  --orta:#B5730B; --orta-bg:#FBF2E0;
+  --acil:#B71C24; --acil-bg:#FBE9EA;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--zemin);color:var(--murekkep);font-size:14px;line-height:1.5}
-h1,h2,h3{font-family:'Space Grotesk',sans-serif;letter-spacing:-.015em}
+body{font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bone-dim);color:var(--ink);
+  font-size:16px;line-height:1.55}
+h1,h2,h3{font-family:'Oswald',sans-serif}
 .mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
 button,select,input,textarea{font:inherit}
-.btn{font-size:12.5px;font-weight:600;padding:8px 13px;border-radius:var(--r);border:1px solid var(--kum);
-  background:var(--yuzey);color:var(--murekkep);cursor:pointer}
-.btn:hover{border-color:var(--sis)}
-.btn.ana{background:var(--murekkep);color:#fff;border-color:var(--murekkep)}
-.btn.kirmizi{background:var(--mercan);color:#fff;border-color:var(--mercan)}
+:focus-visible{outline:3px solid var(--orta);outline-offset:2px}
+
+/* Büyük, parmakla basılabilir düğmeler — sahada telefon/tablet kullanımı için */
+.btn{font-family:'Oswald',sans-serif;font-size:15px;font-weight:500;letter-spacing:.01em;
+  padding:13px 20px;border-radius:4px;border:1.5px solid var(--hair);background:var(--bone);
+  color:var(--ink);cursor:pointer;min-height:46px}
+.btn:hover{border-color:var(--marine-600)}
+.btn.ana{background:var(--marine-800);color:#fff;border-color:var(--marine-800)}
+.btn.ana:hover{background:var(--marine-900)}
+.btn.yesil{background:var(--iyi);color:#fff;border-color:var(--iyi)}
+.btn.kirmizi{background:var(--acil);color:#fff;border-color:var(--acil)}
 input[type=text],input[type=email],input[type=password],select,textarea{
-  padding:8px 10px;border:1px solid var(--kum);border-radius:var(--r);background:var(--yuzey);width:100%}
-textarea{min-height:80px;resize:vertical}
+  padding:12px 13px;border:1.5px solid var(--hair);border-radius:4px;background:var(--bone);
+  width:100%;font-size:16px}
+textarea{min-height:90px;resize:vertical}
 
-/* giriş */
-.giris{max-width:380px;margin:9vh auto;background:var(--yuzey);border:1px solid var(--kum);
-  border-radius:var(--r);padding:26px}
-.giris h1{font-size:19px;margin-bottom:4px}
-.giris p{font-size:12.5px;color:var(--sis);margin-bottom:18px}
-.giris label{font-size:11px;color:var(--sis);display:block;margin:10px 0 4px}
-.hata{background:#FBE7E3;color:var(--mercan);font-size:12px;padding:9px 11px;border-radius:var(--r);margin-top:12px}
+/* ---------- giriş ---------- */
+.giris-sahne{min-height:100vh;background:var(--marine-900);display:flex;align-items:center;
+  justify-content:center;padding:20px}
+.giris{max-width:400px;width:100%;background:var(--bone);border-radius:4px;padding:32px 28px}
+.giris .kas{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--orta);margin-bottom:6px}
+.giris h1{font-size:24px;font-weight:500;color:var(--marine-900);margin-bottom:8px}
+.giris p{font-size:14.5px;color:var(--ink-soft);margin-bottom:22px}
+.giris label{font-size:13px;font-weight:600;color:var(--ink);display:block;margin:14px 0 6px}
+.hata{background:var(--acil-bg);color:var(--acil);font-size:14px;padding:12px 14px;border-radius:4px;
+  margin-top:14px;font-weight:500}
 
-/* uygulama */
-.tepe{background:var(--murekkep);color:#fff;padding:11px 20px;display:flex;justify-content:space-between;
-  align-items:center;gap:14px;flex-wrap:wrap}
-.tepe .marka{font-family:'Space Grotesk';font-weight:700;font-size:15px}
-.tepe .kim{font-size:11.5px;opacity:.72}
-.sekmeler{display:flex;gap:2px;background:var(--yuzey);border-bottom:1px solid var(--kum);padding:0 20px;overflow-x:auto}
-.sekmeler button{background:none;border:none;padding:11px 15px;font-size:12.5px;font-weight:600;color:var(--sis);
-  cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
-.sekmeler button[aria-current=page]{color:var(--murekkep);border-bottom-color:var(--kobalt)}
-.kabuk{max-width:1320px;margin:0 auto;padding:18px 20px 60px}
+/* ---------- uygulama iskeleti ---------- */
+.tepe{background:var(--marine-900);color:#fff;padding:16px 20px;display:flex;
+  justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.tepe .kas{font-family:'Oswald',sans-serif;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--orta)}
+.tepe .marka{font-family:'Oswald',sans-serif;font-weight:500;font-size:19px;text-transform:uppercase;
+  letter-spacing:.01em}
+.tepe .kim{font-size:13.5px;color:var(--teal-soft);text-align:right;display:flex;align-items:center;
+  gap:12px;flex-wrap:wrap}
+.tepe .kim b{color:#fff;font-weight:600}
 
-.kart{background:var(--yuzey);border:1px solid var(--kum);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
-.kart-bas{padding:11px 15px;border-bottom:1px solid var(--kum);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.kart-bas h2{font-size:13px;font-weight:600}
-.kart-bas .not{font-size:11px;color:var(--sis)}
-.kart-ic{padding:15px}
+.sekmeler{display:flex;gap:2px;background:var(--marine-800);padding:0 20px;overflow-x:auto}
+.sekmeler button{background:none;border:none;padding:14px 18px;font-family:'Oswald',sans-serif;
+  font-size:14px;letter-spacing:.02em;color:var(--teal-soft);cursor:pointer;
+  border-bottom:3px solid transparent;white-space:nowrap}
+.sekmeler button[aria-current=page]{color:#fff;border-bottom-color:var(--orta)}
 
-.kpi-satir{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
-.kpi{background:var(--yuzey);border:1px solid var(--kum);border-radius:var(--r);padding:13px 15px}
-.kpi .et{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--sis);margin-bottom:5px}
-.kpi .deger{font-family:'IBM Plex Mono';font-size:24px;font-weight:600;line-height:1.1}
-.kpi .alt{font-size:11px;color:var(--sis);margin-top:3px}
+.kabuk{max-width:1100px;margin:0 auto;padding:22px 20px 70px}
 
-.satir{width:100%;text-align:left;background:none;border:none;border-bottom:1px solid #EDF1F4;
-  padding:12px 15px;cursor:pointer;display:block}
-.satir:hover{background:#F5F8FA}
-.satir-ust{display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap}
-.satir-ust .no{font-family:'IBM Plex Mono';font-size:11px;color:var(--sis)}
-.satir-ust b{font-size:13.5px}
-.satir-alt{font-size:12px;color:var(--sis)}
-.rozet{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:2px}
-.rozet.acil{background:#FBE7E3;color:var(--mercan)}
-.rozet.triyaj{background:#FAF0DC;color:#9B6407}
-.rozet.yeni{background:#E7EEF8;color:var(--kobalt)}
-.rozet.islemde{background:#EDF1F4;color:var(--koyu-sis)}
-.rozet.cozuldu,.rozet.kapandi{background:#E4F1EE;color:var(--turkuaz)}
-.yas{font-family:'IBM Plex Mono';font-size:11px;color:var(--sis);margin-left:auto}
+/* ---------- basit özet kartları ---------- */
+.ozet-satir{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.ozet{background:var(--bone);border:1px solid var(--hair);border-radius:4px;padding:16px 18px}
+.ozet.dikkat{border-color:var(--acil);background:var(--acil-bg)}
+.ozet .et{font-size:13.5px;color:var(--ink-soft);margin-bottom:6px;font-weight:500}
+.ozet .deger{font-family:'Oswald',sans-serif;font-size:32px;font-weight:600;line-height:1;color:var(--marine-800)}
+.ozet.dikkat .deger{color:var(--acil)}
+.ozet .alt{font-size:13px;color:var(--ink-soft);margin-top:5px}
 
-table{width:100%;border-collapse:collapse;font-size:12.5px}
-th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--sis);
-  font-weight:600;padding:9px 12px;border-bottom:1px solid var(--kum)}
-td{padding:9px 12px;border-bottom:1px solid #EDF1F4}
-tr:last-child td{border-bottom:none}
+.aciklama-kutu{font-size:14.5px;color:var(--ink-soft);margin-bottom:16px;max-width:65ch}
+
+/* ---------- iş kartları (liste) ---------- */
+.is-kart{width:100%;text-align:left;background:var(--bone);border:1px solid var(--hair);
+  border-left:5px solid var(--hair);border-radius:4px;padding:16px 18px;margin-bottom:10px;
+  cursor:pointer;display:block}
+.is-kart:hover{border-color:var(--marine-600);border-left-color:var(--marine-600)}
+.is-kart[data-yas="orta"]{border-left-color:var(--orta)}
+.is-kart[data-yas="uzun"]{border-left-color:var(--acil)}
+.is-ust{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.is-ust .baslik{font-size:16.5px;font-weight:600;color:var(--ink)}
+.is-alt{font-size:14px;color:var(--ink-soft);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.is-yas{font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:var(--ink-soft);margin-left:auto;
+  white-space:nowrap}
+.is-yas.uzun{color:var(--acil);font-weight:600}
+.foto-isareti{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;color:var(--marine-700);
+  background:var(--bone-dim);padding:2px 8px;border-radius:20px}
+
+.rozet{font-family:'Oswald',sans-serif;font-size:12px;font-weight:500;letter-spacing:.04em;
+  text-transform:uppercase;padding:4px 10px;border-radius:20px}
+.rozet.acil{background:var(--acil-bg);color:var(--acil)}
+.rozet.triyaj{background:var(--orta-bg);color:var(--orta)}
+.rozet.yeni{background:#E7EEF8;color:var(--marine-700)}
+.rozet.islemde{background:var(--bone-dim);color:var(--ink-soft)}
+.rozet.beklemede{background:var(--orta-bg);color:var(--orta)}
+.rozet.cozuldu,.rozet.kapandi{background:var(--iyi-bg);color:var(--iyi)}
+
+.bos{padding:50px 20px;text-align:center;color:var(--ink-soft);font-size:16px;background:var(--bone);
+  border:1px dashed var(--hair);border-radius:4px}
+
+/* ---------- yönetici tablosu (sadece triyaj/ust_yonetim/sistem_yoneticisi görür) ---------- */
+table{width:100%;border-collapse:collapse;font-size:14.5px;background:var(--bone)}
+th{text-align:left;font-family:'Oswald',sans-serif;font-weight:500;font-size:12.5px;
+  text-transform:uppercase;letter-spacing:.04em;color:var(--marine-900);padding:11px 12px;
+  border-bottom:2px solid var(--marine-800)}
+td{padding:11px 12px;border-bottom:1px solid var(--hair)}
 td.sag,th.sag{text-align:right}
 
-.perde{position:fixed;inset:0;background:rgba(15,31,51,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:40}
+/* ---------- detay penceresi ---------- */
+.perde{position:fixed;inset:0;background:rgba(15,44,92,.55);display:none;align-items:center;
+  justify-content:center;padding:16px;z-index:40}
 .perde.acik{display:flex}
-.modal{background:var(--yuzey);border-radius:var(--r);max-width:640px;width:100%;max-height:88vh;overflow:auto}
-.modal-bas{padding:14px 18px;border-bottom:1px solid var(--kum);display:flex;justify-content:space-between;align-items:center}
-.modal-ic{padding:18px}
-.alan{margin-bottom:12px}
-.alan label{font-size:11px;color:var(--sis);display:block;margin-bottom:4px}
-.bilgi{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;font-size:12.5px;margin-bottom:16px}
-.bilgi span{color:var(--sis)}
-.gecmis{border-top:1px solid var(--kum);margin-top:16px;padding-top:14px}
-.gecmis li{list-style:none;font-size:12px;color:var(--koyu-sis);padding:5px 0;border-bottom:1px solid #F2F5F7}
-.gecmis li time{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--sis);margin-right:8px}
-.bos{padding:36px;text-align:center;color:var(--sis);font-size:13px}
-.uyari{background:#FAF0DC;border:1px solid #EBD4A0;border-radius:var(--r);padding:10px 12px;
-  font-size:11.5px;color:#7A4E05;margin-bottom:12px}
+.modal{background:var(--bone);border-radius:4px;max-width:680px;width:100%;max-height:90vh;
+  overflow:auto}
+.modal-bas{padding:18px 20px;background:var(--marine-900);color:#fff;display:flex;
+  justify-content:space-between;align-items:flex-start;gap:14px}
+.modal-bas h2{font-size:18px;font-weight:500}
+.modal-bas .no{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--teal-soft);margin-top:4px}
+.modal-ic{padding:22px 20px}
+.alan{margin-bottom:16px}
+.alan label{font-size:13.5px;font-weight:600;color:var(--ink);display:block;margin-bottom:6px}
+.bilgi{display:grid;grid-template-columns:110px 1fr;gap:10px 14px;font-size:15px;margin-bottom:20px}
+.bilgi span{color:var(--ink-soft);font-weight:500}
+
+.foto-serit{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.foto-serit a{display:block;width:96px;height:96px;border-radius:4px;overflow:hidden;
+  border:1px solid var(--hair)}
+.foto-serit img{width:100%;height:100%;object-fit:cover;display:block}
+.foto-yukleniyor{font-size:13.5px;color:var(--ink-soft)}
+
+.eylemler{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.gecmis{border-top:1px solid var(--hair);margin-top:22px;padding-top:16px}
+.gecmis h3{font-size:14px;font-weight:600;margin-bottom:10px;color:var(--ink)}
+.gecmis li{list-style:none;font-size:13.5px;color:var(--ink-soft);padding:7px 0;
+  border-bottom:1px solid var(--bone-dim)}
+.gecmis li time{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-soft);
+  margin-right:8px;display:block}
+
+.uyari{background:var(--orta-bg);border:1px solid #EBD4A0;border-radius:4px;padding:13px 15px;
+  font-size:14px;color:#7A4E05;margin-bottom:16px;line-height:1.5}
+
+@media(max-width:640px){
+  .bilgi{grid-template-columns:1fr}
+  .bilgi span{margin-top:8px}
+}
 </style>
 </head>
 <body>
 
 <div id="uygulama"><div class="bos">Yükleniyor…</div></div>
-
 <div class="perde" id="perde"><div class="modal" id="modal"></div></div>
 
 <script type="module">
@@ -104,8 +166,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 /* =====================================================================
    AYAR — Supabase panelinden alınır (Project Settings > API)
    ANON anahtarı tarayıcıda durur; bu güvenlidir çünkü hangi kaydı kimin
-   göreceğini veritabanındaki RLS politikaları belirler
-   (bkz. 05-VERITABANI/rls-politikalari.sql).
+   göreceğini veritabanındaki RLS politikaları belirler.
    ===================================================================== */
 const AYAR = {
   url: 'https://ylclsakyaztnztwllhti.supabase.co',
@@ -115,8 +176,8 @@ const AYAR = {
 const sb = createClient(AYAR.url, AYAR.anon);
 
 const DURUM_ADI = {
-  triyaj: 'Değerlendiriliyor', yeni: 'Yeni', atandi: 'Atandı', islemde: 'İşlemde',
-  beklemede: 'Beklemede', havale: 'Havale edildi', cozuldu: 'Çözüldü',
+  triyaj: 'Değerlendiriliyor', yeni: 'Yeni', atandi: 'Atandı', islemde: 'İşleme alındı',
+  beklemede: 'Vatandaş onayı bekliyor', havale: 'Başka kuruma yönlendirildi', cozuldu: 'Çözüldü',
   kapandi: 'Kapandı', tekrar_acildi: 'Yeniden açıldı', reddedildi: 'Reddedildi',
 };
 const ACIK_DURUMLAR = ['triyaj', 'yeni', 'atandi', 'islemde', 'beklemede', 'tekrar_acildi'];
@@ -134,20 +195,24 @@ sb.auth.onAuthStateChange((olay) => {
 
 function girisEkrani(hata) {
   document.getElementById('uygulama').innerHTML = `
-    <div class="giris">
+    <div class="giris-sahne"><div class="giris">
+      <div class="kas">Maltepe Belediyesi</div>
       <h1>Birim Paneli</h1>
-      <p>Belediye e-posta adresinizle giriş yapın.</p>
-      <label>E-posta</label><input type="email" id="eposta" autocomplete="username">
-      <label>Parola</label><input type="password" id="parola" autocomplete="current-password">
-      <div style="margin-top:16px"><button class="btn ana" style="width:100%" id="girisBtn">Giriş yap</button></div>
+      <p>Size gelen işleri buradan görür, işleme alır ve tamamlarsınız.
+         Belediye e-posta adresiniz ve şifrenizle giriş yapın.</p>
+      <label for="eposta">E-posta adresiniz</label>
+      <input type="email" id="eposta" autocomplete="username" placeholder="adiniz@maltepe.bel.tr">
+      <label for="parola">Şifreniz</label>
+      <input type="password" id="parola" autocomplete="current-password">
+      <div style="margin-top:20px"><button class="btn ana" style="width:100%" id="girisBtn">Giriş yap</button></div>
       ${hata ? `<div class="hata">${kacir(hata)}</div>` : ''}
-    </div>`;
+    </div></div>`;
   document.getElementById('girisBtn').onclick = async () => {
     const { error } = await sb.auth.signInWithPassword({
       email: document.getElementById('eposta').value.trim(),
       password: document.getElementById('parola').value,
     });
-    if (error) girisEkrani('Giriş başarısız: ' + error.message);
+    if (error) girisEkrani('Giriş olmadı: e-posta ya da şifre yanlış görünüyor. Tekrar deneyin.');
     else baslat();
   };
   document.getElementById('parola').onkeydown = e => { if (e.key === 'Enter') document.getElementById('girisBtn').click(); };
@@ -158,7 +223,7 @@ async function baslat() {
   const { data } = await sb.from('profiller')
     .select('*, birimler ( id, ad, kisa_ad )').eq('id', user.id).maybeSingle();
 
-  if (!data) return girisEkrani('Bu hesap bir birime tanımlanmamış. Sistem yöneticinize başvurun.');
+  if (!data) return girisEkrani('Bu hesap henüz bir birime bağlanmamış. Yöneticinize haber verin.');
   PROFIL = data;
   await kayitlariGetir();
   canliBagla();
@@ -171,7 +236,8 @@ async function kayitlariGetir() {
   const { data, error } = await sb.from('sikayetler')
     .select(`id, takip_no, baslik, ozet, durum, oncelik, acil, olusturma, cozum_tarihi,
              mahalle_metin, adres, ai_guven, ai_gerekce, destekleyen_sayisi, sla_bitis,
-             kategoriler ( ad ), birimler ( ad, kisa_ad )`)
+             kategoriler ( ad ), birimler ( ad, kisa_ad ),
+             sikayet_ekleri ( id, dosya_yolu, tip )`)
     .order('acil', { ascending: false })
     .order('olusturma', { ascending: false })
     .limit(500);
@@ -193,73 +259,78 @@ function canliBagla() {
 function ciz() {
   const yonetici = ['ust_yonetim', 'sistem_yoneticisi', 'triyaj'].includes(PROFIL.rol);
   const sekmeler = [
-    ['gelen', 'Gelen kutusu'],
-    ['bekleyen', 'Bekleyenler'],
-    ...(yonetici ? [['triyaj', 'Triyaj havuzu'], ['panos', 'Yönetim panosu']] : []),
-    ['kapali', 'Kapanmış'],
+    ['gelen', 'Bana gelen işler'],
+    ['bekleyen', 'Onay bekleyenler'],
+    ...(yonetici ? [['triyaj', 'Yönlendirme kutusu'], ['panos', 'Genel durum']] : []),
+    ['kapali', 'Biten işler'],
   ];
 
   document.getElementById('uygulama').innerHTML = `
     <div class="tepe">
-      <div><div class="marka">Şikayet Yönetim Sistemi</div></div>
-      <div class="kim">${kacir(PROFIL.ad_soyad ?? '')} —
-        ${kacir(PROFIL.birimler?.ad ?? 'Birim atanmamış')} • ${kacir(PROFIL.rol)}
-        <button class="btn" style="margin-left:10px;padding:4px 9px" id="cikis">Çıkış</button></div>
+      <div><div class="kas">Maltepe Belediyesi</div><div class="marka">Birim Paneli</div></div>
+      <div class="kim"><b>${kacir(PROFIL.ad_soyad ?? '')}</b> ·
+        ${kacir(PROFIL.birimler?.ad ?? 'Birim atanmamış')}
+        <button class="btn" style="padding:8px 14px;min-height:auto;font-size:13px" id="cikis">Çıkış yap</button></div>
     </div>
     <div class="sekmeler">
       ${sekmeler.map(([k, ad]) => `<button data-s="${k}" ${k === SAYFA ? 'aria-current="page"' : ''}>${ad}</button>`).join('')}
     </div>
     <div class="kabuk">${
       SAYFA === 'panos' ? sayfaPanos() :
-      SAYFA === 'triyaj' ? liste(KAYITLAR.filter(k => k.durum === 'triyaj'), 'Triyaj havuzu',
-        'Yapay zekanın emin olamadığı kayıtlar. Doğru birime siz yönlendirirsiniz.') :
+      SAYFA === 'triyaj' ? liste(KAYITLAR.filter(k => k.durum === 'triyaj'), 'Yönlendirme kutusu',
+        'Yapay zekanın hangi birime ait olduğundan emin olamadığı işler. Doğru birime siz yönlendirirsiniz.') :
       SAYFA === 'bekleyen' ? liste(KAYITLAR.filter(k => ['beklemede', 'cozuldu'].includes(k.durum)),
-        'Bekleyenler', 'Beklemeye alınmış ve vatandaş onayı bekleyen kayıtlar.') :
-      SAYFA === 'kapali' ? liste(KAYITLAR.filter(k => ['kapandi', 'reddedildi', 'havale'].includes(k.durum)), 'Kapanmış kayıtlar') :
-      liste(KAYITLAR.filter(k => ACIK_DURUMLAR.includes(k.durum) && k.durum !== 'triyaj'), 'Gelen kutusu')
+        'Onay bekleyenler', 'Tamamlandı diye işaretlendi, vatandaşın onaylaması bekleniyor.') :
+      SAYFA === 'kapali' ? liste(KAYITLAR.filter(k => ['kapandi', 'reddedildi', 'havale'].includes(k.durum)), 'Biten işler') :
+      liste(KAYITLAR.filter(k => ACIK_DURUMLAR.includes(k.durum) && k.durum !== 'triyaj'), 'Bana gelen işler')
     }</div>`;
 
   document.querySelectorAll('.sekmeler button').forEach(b =>
     b.onclick = () => { SAYFA = b.dataset.s; ciz(); });
   document.getElementById('cikis').onclick = () => sb.auth.signOut();
-  document.querySelectorAll('.satir[data-id]').forEach(b =>
+  document.querySelectorAll('.is-kart[data-id]').forEach(b =>
     b.onclick = () => detayAc(b.dataset.id));
 }
+
+function yasSinifi(gun) { return gun >= 14 ? 'uzun' : gun >= 5 ? 'orta' : 'kisa'; }
 
 function liste(kayitlar, baslik, aciklama) {
   const acik = KAYITLAR.filter(k => ACIK_DURUMLAR.includes(k.durum));
   const yaslar = acik.map(k => yasGun(k.olusturma));
-  const kapanan = KAYITLAR.filter(k => k.cozum_tarihi);
-  const sureler = kapanan.map(k => (new Date(k.cozum_tarihi) - new Date(k.olusturma)) / 86400000);
+  const acilSayi = acik.filter(k => k.acil).length;
+  const enEski = yaslar.length ? Math.max(...yaslar) : 0;
 
   return `
-  <div class="kpi-satir">
-    ${kpi('Açık kayıt', acik.length, `${acik.filter(k => k.acil).length} acil`)}
-    ${kpi('En eski açık', yaslar.length ? Math.max(...yaslar).toFixed(0) : '—', 'gün')}
-    ${kpi('Açık yaşı (medyan)', yaslar.length ? medyan(yaslar).toFixed(1) : '—', 'gün')}
-    ${kpi('Çözüm süresi (medyan)', sureler.length ? medyan(sureler).toFixed(1) : '—',
-      `${kapanan.length} kapanmış kayıt üzerinden`)}
+  <div class="ozet-satir">
+    <div class="ozet"><div class="et">Elinizde kaç iş var</div>
+      <div class="deger">${acik.length}</div><div class="alt">şu an açık</div></div>
+    <div class="ozet ${enEski >= 14 ? 'dikkat' : ''}"><div class="et">En eski iş</div>
+      <div class="deger">${enEski ? enEski.toFixed(0) : '—'}</div><div class="alt">gündür bekliyor</div></div>
+    ${acilSayi > 0 ? `<div class="ozet dikkat"><div class="et">Acil işaretli</div>
+      <div class="deger">${acilSayi}</div><div class="alt">önce bunlara bakın</div></div>` : ''}
   </div>
-  <div class="kart">
-    <div class="kart-bas"><h2>${baslik}</h2><span class="not">${kayitlar.length} kayıt</span></div>
-    ${aciklama ? `<div class="kart-ic" style="padding-bottom:0"><p class="not" style="font-size:12px;color:var(--sis)">${aciklama}</p></div>` : ''}
-    ${kayitlar.length ? kayitlar.map(satirHTML).join('') : '<div class="bos">Kayıt yok.</div>'}
-  </div>`;
+  ${aciklama ? `<p class="aciklama-kutu">${aciklama}</p>` : ''}
+  ${kayitlar.length ? kayitlar.map(satirHTML).join('') : '<div class="bos">Şu an burada iş yok.</div>'}
+  `;
 }
 
 function satirHTML(k) {
-  return `<button class="satir" data-id="${k.id}">
-    <div class="satir-ust">
-      ${k.acil ? '<span class="rozet acil">acil</span>' : ''}
+  const yas = yasGun(k.olusturma);
+  const sinif = yasSinifi(yas);
+  const fotoSayisi = (k.sikayet_ekleri ?? []).filter(e => e.dosya_yolu).length;
+  return `<button class="is-kart" data-id="${k.id}" data-yas="${sinif}">
+    <div class="is-ust">
+      ${k.acil ? '<span class="rozet acil">Acil</span>' : ''}
       <span class="rozet ${k.durum}">${DURUM_ADI[k.durum] ?? k.durum}</span>
-      <b>${kacir(k.baslik ?? '(başlıksız)')}</b>
-      <span class="no">${kacir(k.takip_no ?? '')}</span>
-      <span class="yas">${yasGun(k.olusturma).toFixed(0)} gün</span>
+      <span class="baslik">${kacir(k.baslik ?? k.kategoriler?.ad ?? 'Başlıksız iş')}</span>
+      <span class="is-yas ${sinif === 'uzun' ? 'uzun' : ''}">${yas.toFixed(0)} gündür</span>
     </div>
-    <div class="satir-alt">${kacir(k.kategoriler?.ad ?? 'Kategori yok')} •
-      ${kacir(k.mahalle_metin ?? 'Mahalle belirtilmemiş')} •
-      ${kacir(k.birimler?.kisa_ad ?? k.birimler?.ad ?? 'Birim atanmamış')}
-      ${k.destekleyen_sayisi > 1 ? ` • aynı sorunu bildiren ${k.destekleyen_sayisi} kişi` : ''}</div>
+    <div class="is-alt">
+      <span>${kacir(k.mahalle_metin ?? 'Mahalle belirtilmemiş')}</span>
+      ${k.adres ? `<span>· ${kacir(k.adres)}</span>` : ''}
+      ${fotoSayisi ? `<span class="foto-isareti">📷 ${fotoSayisi} fotoğraf</span>` : ''}
+      ${k.destekleyen_sayisi > 1 ? `<span>· aynı sorunu bildiren ${k.destekleyen_sayisi} kişi</span>` : ''}
+    </div>
   </button>`;
 }
 
@@ -276,15 +347,14 @@ function sayfaPanos() {
   const satirlar = [...birimler.values()].sort((a, b) => b.acik - a.acik);
 
   return `
-  <div class="uyari">Bu tablo <b>hedef süre kullanmaz</b>. Her birim kendi kapanış süreleriyle gösterilir;
-    "geç kaldı" hükmünü veri değil, işi bilen yönetici verir. Derin analiz (sapma, mahalle kümelenmesi,
-    dönem kıyaslaması) için <b>Erken Uyarı Panosu</b>'nu kullanın.</div>
-  <div class="kart">
-    <div class="kart-bas"><h2>Birim durumu</h2><span class="not">son 500 kayıt</span></div>
+  <div class="uyari">Bu tablo <b>hedef süre kullanmaz</b>. Her birim kendi geçmişine göre gösterilir;
+    "geç kaldı" hükmünü veri değil, işi bilen yönetici verir. Daha derin analiz için
+    <b>Erken Uyarı Panosu</b>'nu kullanın.</div>
+  <div style="background:var(--bone);border:1px solid var(--hair);border-radius:4px;overflow:hidden">
     <table>
       <tr><th>Birim</th><th class="sag">Toplam</th><th class="sag">Açık</th>
-        <th class="sag">En eski açık (gün)</th><th class="sag">Açık yaşı medyan</th>
-        <th class="sag">Çözüm süresi medyan (gün)</th></tr>
+        <th class="sag">En eski açık (gün)</th><th class="sag">Tipik açık yaşı (gün)</th>
+        <th class="sag">Tipik bitirme süresi (gün)</th></tr>
       ${satirlar.map(b => `<tr>
         <td><b>${kacir(b.ad)}</b></td>
         <td class="sag mono">${b.toplam}</td>
@@ -309,44 +379,46 @@ async function detayAc(id) {
 
   document.getElementById('modal').innerHTML = `
     <div class="modal-bas">
-      <div><h2 style="font-size:15px">${kacir(k.baslik ?? '')}</h2>
-        <span class="mono" style="font-size:11px;color:var(--sis)">${kacir(k.takip_no ?? '')}</span></div>
-      <button class="btn" id="kapat">Kapat</button>
+      <div><h2>${kacir(k.baslik ?? k.kategoriler?.ad ?? 'Başlıksız iş')}</h2>
+        <div class="no">${kacir(k.takip_no ?? '')}</div></div>
+      <button class="btn" style="padding:8px 14px;min-height:auto;font-size:13px" id="kapat">Kapat</button>
     </div>
     <div class="modal-ic">
       <div class="bilgi">
         <span>Durum</span><b>${DURUM_ADI[k.durum] ?? k.durum}</b>
-        <span>Kategori</span><div>${kacir(k.kategoriler?.ad ?? '—')}</div>
-        <span>Birim</span><div>${kacir(k.birimler?.ad ?? 'Atanmamış')}</div>
+        <span>Konu</span><div>${kacir(k.kategoriler?.ad ?? '—')}</div>
         <span>Yer</span><div>${kacir(k.mahalle_metin ?? '—')} ${kacir(k.adres ?? '')}</div>
-        <span>Açılış</span><div>${new Date(k.olusturma).toLocaleString('tr-TR')}
+        <span>Ne zaman geldi</span><div>${new Date(k.olusturma).toLocaleString('tr-TR')}
           (${yasGun(k.olusturma).toFixed(0)} gün önce)</div>
-        <span>Özet</span><div>${kacir(k.ozet ?? '')}</div>
-        ${k.ai_gerekce ? `<span>YZ gerekçesi</span><div style="color:var(--sis)">${kacir(k.ai_gerekce)}
-          (güven ${(k.ai_guven ?? 0).toFixed(2)})</div>` : ''}
+        <span>Vatandaşın yazdığı</span><div>${kacir(k.ozet ?? '')}</div>
+      </div>
+
+      <div class="alan" id="fotoAlani" hidden>
+        <label>Fotoğraflar</label>
+        <div class="foto-serit" id="fotoSerit"><span class="foto-yukleniyor">Yükleniyor…</span></div>
       </div>
 
       ${k.durum === 'triyaj' ? `
-        <div class="alan"><label>Doğru birime yönlendir</label>
+        <div class="alan"><label>Bu iş hangi birime ait?</label>
           <select id="hedefBirim"><option value="">Birim seçin…</option>
             ${(birimler ?? []).map(b => `<option value="${b.id}">${kacir(b.ad)}</option>`).join('')}</select></div>
-        <button class="btn ana" id="yonlendir">Yönlendir</button>
+        <button class="btn ana" id="yonlendir">Bu birime gönder</button>
       ` : ['kapandi', 'reddedildi', 'havale'].includes(k.durum) ? '' : `
-        <div class="alan"><label>Yapılan işlem / çözüm raporu</label>
-          <textarea id="notMetni" placeholder="Ne yapıldı? Kapatmak için bu alan zorunludur."></textarea></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div class="alan"><label>Ne yaptınız? (Bitti demek için bu alanı doldurun)</label>
+          <textarea id="notMetni" placeholder="Örnek: Ekip gönderildi, çukur asfaltla dolduruldu."></textarea></div>
+        <div class="eylemler">
           <button class="btn" data-durum="islemde">İşleme aldım</button>
           <button class="btn" data-durum="beklemede">Beklemeye al</button>
-          <button class="btn ana" data-durum="cozuldu">Çözüldü olarak kaydet</button>
-          <button class="btn kirmizi" id="iade">Bu kayıt bize ait değil</button>
+          <button class="btn yesil" data-durum="cozuldu">İş bitti</button>
+          <button class="btn kirmizi" id="iade">Bu iş bize ait değil</button>
         </div>
       `}
 
-      <div class="gecmis"><h3 style="font-size:12px;margin-bottom:8px">İşlem geçmişi</h3>
+      <div class="gecmis"><h3>Bu işte daha önce ne olmuş</h3>
         <ul>${(hareketler ?? []).map(h => `<li>
           <time>${new Date(h.olusturma).toLocaleString('tr-TR')}</time>
           <b>${kacir(h.islem)}</b> ${kacir(h.not_metni ?? '')}
-          <span style="color:var(--sis)">— ${kacir(h.profiller?.ad_soyad ?? h.aktor)}</span></li>`).join('') || '<li>Kayıt yok.</li>'}</ul>
+          <span style="color:var(--ink-soft)"> — ${kacir(h.profiller?.ad_soyad ?? h.aktor)}</span></li>`).join('') || '<li>Kayıt yok.</li>'}</ul>
       </div>
     </div>`;
 
@@ -358,15 +430,36 @@ async function detayAc(id) {
   if (iade) iade.onclick = () => iadeEt(k);
   const yon = document.getElementById('yonlendir');
   if (yon) yon.onclick = () => yonlendir(k);
+
+  fotolariYukle(k);
+}
+
+// Storage'daki fotoğrafları güvenli, süreli bağlantılarla getirip küçük resim şeridi olarak gösterir.
+async function fotolariYukle(k) {
+  const dosyalar = (k.sikayet_ekleri ?? []).filter(e => e.dosya_yolu);
+  if (!dosyalar.length) return;
+  document.getElementById('fotoAlani').hidden = false;
+
+  const baglantilar = await Promise.all(dosyalar.map(async e => {
+    const { data, error } = await sb.storage.from('sikayet-ekleri').createSignedUrl(e.dosya_yolu, 3600);
+    return error ? null : data.signedUrl;
+  }));
+
+  const gecerli = baglantilar.filter(Boolean);
+  const serit = document.getElementById('fotoSerit');
+  if (!serit) return; // kullanıcı modalı bu arada kapatmış olabilir
+  serit.innerHTML = gecerli.length
+    ? gecerli.map(u => `<a href="${u}" target="_blank" rel="noopener"><img src="${u}" loading="lazy"></a>`).join('')
+    : '<span class="foto-yukleniyor">Fotoğraflar açılamadı.</span>';
 }
 
 async function durumIsle(k, durum) {
   const not = document.getElementById('notMetni')?.value?.trim() ?? '';
   if (durum === 'cozuldu' && !not) {
-    return alert('Kaydı çözüldü olarak işaretlemek için ne yapıldığını yazmanız gerekiyor.');
+    return alert('İşi bitti olarak işaretlemek için ne yaptığınızı yazmanız gerekiyor.');
   }
   const { error } = await sb.from('sikayetler').update({ durum }).eq('id', k.id);
-  if (error) return alert('Güncellenemedi: ' + error.message);
+  if (error) return alert('Kaydedilemedi: ' + error.message);
 
   if (durum === 'cozuldu') {
     await sb.from('cozum_raporlari').insert({ sikayet_id: k.id, aciklama: not });
@@ -380,7 +473,7 @@ async function durumIsle(k, durum) {
 
 async function iadeEt(k) {
   const not = document.getElementById('notMetni')?.value?.trim() ?? '';
-  if (!not) return alert('İade için gerekçe yazmanız gerekiyor.');
+  if (!not) return alert('Bu işin neden size ait olmadığını kısaca yazmanız gerekiyor.');
   await sb.from('sikayet_hareketleri').insert({
     sikayet_id: k.id, kullanici_id: PROFIL.id, aktor: 'kullanici',
     islem: 'iade', not_metni: not });
@@ -392,7 +485,7 @@ async function iadeEt(k) {
 
 async function yonlendir(k) {
   const birimId = document.getElementById('hedefBirim').value;
-  if (!birimId) return alert('Birim seçin.');
+  if (!birimId) return alert('Önce bir birim seçin.');
   const { error } = await sb.from('sikayetler')
     .update({ birim_id: birimId, durum: 'yeni' }).eq('id', k.id);
   if (error) return alert(error.message);
@@ -407,10 +500,6 @@ document.getElementById('perde').onclick = e => { if (e.target.id === 'perde') m
 
 /* ---------------- yardımcı ---------------- */
 
-function kpi(et, deger, alt) {
-  return `<div class="kpi"><div class="et">${et}</div><div class="deger">${deger}</div>
-    <div class="alt">${alt ?? ''}</div></div>`;
-}
 function yasGun(t) { return (Date.now() - new Date(t).getTime()) / 86400000; }
 function medyan(d) {
   const s = [...d].sort((a, b) => a - b), o = Math.floor(s.length / 2);

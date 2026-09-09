@@ -221,6 +221,9 @@ app.addHook('onRequest', async (req, reply) => {
 // ---------------------------------------------------------------------
 app.addHook('onRequest', async (req, reply) => {
   if (!req.url.startsWith('/panolar')) return;
+  // Birim paneli günlük kullanım için — kendi Supabase girişi zaten var,
+  // paylaşılan şifreyi ikinci bir kapı olarak istemiyoruz.
+  if (req.url.startsWith('/panolar/birim-paneli.html')) return;
 
   const beklenenKullanici = process.env.PANO_KULLANICI;
   const beklenenSifre = process.env.PANO_SIFRE;
